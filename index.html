@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>UMFF 나의 상영 계획</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --ridge-950:#0a1112; --ridge-900:#12181a; --ridge-800:#1b2422;
+    --moss-500:#4FD9A8; --moss-300:#9fe6c8; --trail-500:#3FC6E8; --trail-300:#8fdcf0;
+    --stone-100:#eef0e9; --stone-300:#c7cdc3; --danger:#c25454; --ok:#4FD9A8;
+    --pink-400:#E8A0C4;
+    --line: rgba(238,240,233,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(79,217,168,0.16), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(63,198,232,0.12), transparent 55%),
+      var(--ridge-950);
+    color:var(--stone-100); font-family:'Plus Jakarta Sans', sans-serif; min-height:100vh; line-height:1.5;
+  }
+  .display{font-family:'Archivo Narrow', sans-serif;}
+  .wrap{max-width:1180px; margin:0 auto; padding:20px 16px 80px;}
+  header.top{padding:28px 20px 24px; margin:0 -16px; border-bottom:1px solid var(--line); position:relative; overflow:hidden;
+    background:linear-gradient(180deg, rgba(63,198,232,0.14) 0%, rgba(232,160,196,0.08) 45%, rgba(79,217,168,0.05) 100%);}
+  .contour{position:absolute; right:-40px; top:-60px; width:220px; height:220px; opacity:0.35; pointer-events:none;}
+  .kicker{color:var(--moss-300); font-size:13px; margin:0 0 4px;}
+  h1{font-family:'Archivo Narrow', sans-serif; font-weight:700; font-size:clamp(28px,5vw,42px); margin:0 0 6px; line-height:1.05;}
+  .sub{color:var(--stone-300); font-size:14.5px; max-width:60ch; margin:0;}
+  .datebar{display:flex; gap:8px; overflow-x:auto; padding:16px 2px 4px; margin-bottom:10px;}
+  .datebtn{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--stone-300); padding:9px 14px; border-radius:3px; font-family:'Archivo Narrow'; font-size:16px; font-weight:600; cursor:pointer;}
+  .datebtn.active{border-color:var(--trail-500); color:var(--trail-300); background:rgba(63,198,232,0.08);}
+  .datebtn .cnt{display:block; font-family:'Plus Jakarta Sans'; font-size:11px; font-weight:400; color:var(--stone-300); margin-top:2px;}
+  .layout{display:grid; grid-template-columns: 1.1fr 1fr; gap:20px; align-items:start;}
+  @media (max-width: 860px){ .layout{grid-template-columns:1fr;} }
+  .panel{background:var(--ridge-900); border:1px solid var(--line); border-radius:4px; padding:16px;}
+  .panel h2{font-family:'Archivo Narrow'; font-size:20px; font-weight:600; margin:0 0 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .panel h2 small{font-family:'Plus Jakarta Sans'; font-size:12px; font-weight:400; color:var(--stone-300);}
+  .mobiletabs{display:none; gap:6px; margin-bottom:12px;}
+  @media (max-width:860px){ .mobiletabs{display:flex;} .mtab-hide{display:none;} }
+  .mtabbtn{flex:1; padding:9px; border-radius:3px; border:1px solid var(--line); background:transparent; color:var(--stone-300); font-family:'Archivo Narrow'; font-size:15px; font-weight:600; cursor:pointer;}
+  .mtabbtn.active{background:var(--moss-500); color:var(--ridge-950); border-color:var(--moss-500);}
+  .addbox{border:1px dashed var(--line); border-radius:3px; padding:12px; margin-bottom:14px;}
+  .addbox textarea, .addbox input[type=text]{width:100%; background:var(--ridge-950); color:var(--stone-100); border:1px solid var(--line); border-radius:3px; padding:9px 10px; font-family:'Plus Jakarta Sans'; font-size:13.5px;}
+  .addbox textarea{min-height:64px; resize:vertical;}
+  .addbox .hint{color:var(--stone-300); font-size:12px; margin:6px 0 10px; line-height:1.5;}
+  .addbox .hint code{color:var(--trail-300); background:rgba(63,198,232,0.1); padding:1px 4px; border-radius:2px;}
+  .row-inline{display:flex; gap:8px; flex-wrap:wrap;}
+  .btn{border:none; border-radius:3px; padding:9px 14px; font-family:'Archivo Narrow'; font-weight:600; font-size:15px; cursor:pointer; background:var(--moss-500); color:var(--ridge-950);}
+  .btn.secondary{background:transparent; border:1px solid var(--line); color:var(--stone-100);}
+  .btn.small{padding:5px 10px; font-size:13px;}
+  .btn.danger{background:var(--danger); color:var(--stone-100);}
+  .btn:disabled{opacity:0.4; cursor:not-allowed;}
+  .proglist{display:flex; flex-direction:column; gap:8px; max-height:620px; overflow-y:auto; padding-right:2px;}
+  .card{border:1px solid var(--line); border-radius:3px; padding:10px 12px; background:var(--ridge-800);}
+  .cardtop{display:flex; gap:10px; align-items:flex-start;}
+  .card .time{font-family:'Archivo Narrow'; font-weight:600; font-size:17px; color:var(--trail-300); min-width:78px;}
+  .card .time small{display:block; font-family:'Plus Jakarta Sans'; font-size:11px; color:var(--stone-300); font-weight:400;}
+  .card .meta{flex:1; min-width:0;}
+  .card .title{font-size:14.5px; font-weight:500; word-break:keep-all; cursor:pointer; text-decoration:underline dotted var(--stone-300); text-underline-offset:3px;}
+  .card .venue{display:inline-block; margin-top:5px; font-size:11.5px; color:var(--moss-300); border:1px solid var(--moss-500); padding:1px 7px; border-radius:20px;}
+  .card .actions{display:flex; flex-direction:column; gap:6px;}
+  .card .detail{display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:13px; color:var(--stone-300); line-height:1.6;}
+  .card .detail.open{display:block;}
+  .empty{color:var(--stone-300); font-size:13.5px; text-align:center; padding:30px 10px; border:1px dashed var(--line); border-radius:4px;}
+  .timeline{position:relative; padding-left:56px;}
+  .tl-item{position:relative; padding:10px 0 22px;}
+  .tl-item .dot{position:absolute; left:-42px; top:12px; width:10px; height:10px; border-radius:50%; background:var(--moss-500); border:2px solid var(--ridge-950); box-shadow:0 0 0 1px var(--moss-500);}
+  .tl-item.conflict .dot{background:var(--danger); box-shadow:0 0 0 1px var(--danger);}
+  .tl-item::before{content:''; position:absolute; left:-38px; top:0; bottom:0; width:1px; background:var(--line);}
+  .tl-item:first-child::before{top:12px;}
+  .tl-item .t{position:absolute; left:-56px; top:8px; font-family:'Archivo Narrow'; font-weight:600; font-size:13px; color:var(--stone-300); width:44px; text-align:right;}
+  .tl-card{border:1px solid var(--line); border-radius:3px; padding:9px 11px; background:var(--ridge-800);}
+  .tl-item.conflict .tl-card{border-color:var(--danger); background:rgba(194,84,84,0.08);}
+  .tl-card .title{font-size:14px; font-weight:500;}
+  .tl-card .venue{font-size:11.5px; color:var(--moss-300);}
+  .conflictflag{color:var(--danger); font-size:12px; font-weight:600; margin-top:4px; display:block;}
+  .movetag{font-size:12px; color:var(--trail-300); margin:2px 0 0 0; padding:2px 0 2px 4px;}
+  .venuebox{margin-top:16px;}
+  .venuebox .vrow{display:flex; gap:6px; margin-bottom:6px;}
+  .venuebox input{background:var(--ridge-950); border:1px solid var(--line); color:var(--stone-100); border-radius:3px; padding:6px 8px; font-size:13px;}
+  .venuebox input.code{width:64px; flex:0 0 auto; color:var(--moss-300); font-weight:600;}
+  .venuebox input.name{flex:1;}
+  .toolbar{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;}
+  .stat{font-size:12.5px; color:var(--stone-300);}
+  .stat b{color:var(--stone-100);}
+  .removeicon{background:none; border:none; border-radius:3px; color:var(--stone-300); cursor:pointer; font-size:16px; line-height:1; padding:8px 10px;}
+  .removeicon:hover{color:var(--danger);}
+  .banner{border-radius:3px; padding:9px 12px; font-size:13px; margin-bottom:10px;}
+  .banner.ok{background:rgba(79,217,168,0.15); border:1px solid var(--moss-500); color:var(--moss-300);}
+  .banner.bad{background:rgba(194,84,84,0.12); border:1px solid var(--danger); color:#e79b9b;}
+  .sharebox{margin-top:18px; border-top:1px solid var(--line); padding-top:14px;}
+  .sharebox .code{font-family:'Archivo Narrow'; font-size:22px; letter-spacing:3px; color:var(--trail-300); background:var(--ridge-950); border:1px solid var(--line); padding:8px 12px; border-radius:3px; display:inline-block;}
+  .mapwrap{margin-top:14px; border:1px solid var(--line); border-radius:4px; padding:8px; background:var(--ridge-950);}
+  #shareCardHolder{position:absolute; left:-9999px; top:0;}
+  .sharecard{width:680px; padding:40px 36px 32px; background:
+      radial-gradient(700px 380px at 90% -10%, rgba(63,198,232,0.16), transparent 60%),
+      radial-gradient(700px 380px at -10% 110%, rgba(79,217,168,0.22), transparent 60%),
+      var(--ridge-950);
+    color:var(--stone-100); font-family:'Plus Jakarta Sans', sans-serif; position:relative; overflow:hidden;}
+  .sharecard .kicker{color:var(--moss-300); font-size:14px; margin:0 0 6px; font-family:'Archivo Narrow'; font-weight:600; letter-spacing:0.02em;}
+  .sharecard h3{font-family:'Archivo Narrow'; font-weight:700; font-size:34px; margin:0 0 4px;}
+  .sharecard .d{color:var(--stone-300); font-size:14px; margin:0 0 22px;}
+  .sc-row{display:flex; gap:14px; padding:12px 0; border-top:1px solid var(--line);}
+  .sc-row:last-of-type{border-bottom:1px solid var(--line);}
+  .sc-time{font-family:'Archivo Narrow'; font-weight:700; font-size:19px; color:var(--trail-300); min-width:96px;}
+  .sc-title{font-size:15.5px; font-weight:500; flex:1;}
+  .sc-venue{font-size:12px; color:var(--moss-300); margin-top:3px;}
+  .sc-foot{margin-top:22px; display:flex; justify-content:space-between; align-items:center; font-family:'Archivo Narrow'; font-size:14px; color:var(--stone-300);}
+  .shareimgwrap{margin-top:12px;}
+  .shareimgwrap img{max-width:100%; border-radius:4px; border:1px solid var(--line);}
+  .mapnote{font-size:11.5px; color:var(--stone-300); margin-top:6px;}
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--ridge-800); border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <svg class="contour" viewBox="0 0 200 200">
+      <path d="M0,200 L60,90 L100,140 L140,50 L200,120 L200,200 Z" fill="#4FD9A8" opacity="0.06"/>
+      <g fill="none" stroke="#9fe6c8" stroke-width="1.2">
+        <path d="M10,150 Q60,60 110,110 T190,90"/><path d="M0,170 Q70,90 120,130 T200,110"/><path d="M20,190 Q80,120 130,150 T200,135"/>
+      </g>
+    </svg>
+    <p class="kicker">울주산악영화제 · 개인 관람 계획</p>
+    <h1>내 상영 시간표 짜기</h1>
+    <p class="sub">날짜를 고르면 그날 프로그램이 뜨고, 제목을 누르면 상세 내용을 볼 수 있어요. 담은 프로그램은 겹쳐도 일단 타임라인에 올라가고, 확정할 때 겹치는 부분을 빨갛게 표시해서 정리해드려요.</p>
+  </header>
+
+  <div class="datebar" id="datebar"></div>
+
+  <div class="mobiletabs">
+    <button class="mtabbtn active" id="mtab-list">전체 프로그램</button>
+    <button class="mtabbtn" id="mtab-plan">내 타임라인 · 동선</button>
+  </div>
+
+  <div class="layout">
+    <section class="panel" id="panel-list">
+      <h2>이 날 프로그램 <small id="dateLabel"></small></h2>
+      <div class="row-inline" style="margin-bottom:10px;">
+        <button class="btn small secondary" id="btnRefresh">↻ 최신 목록 새로고침</button>
+      </div>
+
+      <div class="addbox">
+        <div class="row-inline" style="margin-bottom:8px;">
+          <button class="btn small secondary" id="btnQuickAdd">+ 한 개씩 입력</button>
+          <button class="btn small secondary" id="btnBulkAdd">+ 여러 줄 붙여넣기</button>
+        </div>
+        <p class="hint">이 목록은 이 앱을 쓰는 모두와 함께 공유돼요. 한 번만 입력해두면 같이 보는 사람도 볼 수 있어요.</p>
+
+        <div id="quickAddForm" style="display:none; margin-bottom:10px;">
+          <div class="row-inline" style="margin-bottom:6px;">
+            <input id="qa-start" type="time" style="background:var(--ridge-950);border:1px solid var(--line);color:var(--stone-100);border-radius:3px;padding:6px 8px;">
+            <input id="qa-end" type="time" style="background:var(--ridge-950);border:1px solid var(--line);color:var(--stone-100);border-radius:3px;padding:6px 8px;" title="종료 시간(선택)">
+            <input id="qa-venue" placeholder="장소코드 (예: UC)" style="background:var(--ridge-950);border:1px solid var(--line);color:var(--stone-100);border-radius:3px;padding:6px 8px;width:110px;">
+          </div>
+          <textarea id="qa-title" placeholder="프로그램명" style="min-height:40px; margin-bottom:6px;"></textarea>
+          <textarea id="qa-detail" placeholder="상세 설명 (선택, 시놉시스·등급 등)"></textarea>
+          <div style="margin-top:8px;"><button class="btn small" id="qa-submit">추가</button></div>
+        </div>
+
+        <div id="bulkAddForm" style="display:none;">
+          <p class="hint">한 줄에 하나씩, <code>시작-종료 | 장소 | 제목 | 상세설명</code> 형식으로. 종료 시간·장소·상세설명은 생략 가능해요.<br>예) <code>09:30-11:00 | UC | 로컬시네마: 숏폼 애니메이션 | 국내 단편 5편 상영</code></p>
+          <textarea id="bulk-text" placeholder="09:30-11:00 | UC | 프로그램명 | 상세설명&#10;13:00 | AC1 | 프로그램명"></textarea>
+          <div style="margin-top:8px;"><button class="btn small" id="bulk-submit">일괄 추가</button></div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <span class="stat"><b id="progCount">0</b>개 프로그램 · <b id="planCount">0</b>개 담김</span>
+      </div>
+      <div class="proglist" id="proglist"></div>
+    </section>
+
+    <section class="panel mtab-hide" id="panel-plan">
+      <h2>내 타임라인 <small id="planDateLabel"></small></h2>
+      <div id="statusBanner"></div>
+      <div class="timeline" id="timeline"></div>
+      <div class="row-inline" style="margin-top:12px;">
+        <button class="btn" id="btnConfirm">일정 확정하고 저장</button>
+      </div>
+
+      <div class="mapwrap">
+        <div id="mapSvgHolder"></div>
+        <p class="mapnote">* 공식 행사장 지도의 배치를 참고해 새로 그린 약식 안내도예요(원본 이미지는 그대로 사용하지 않았어요). 회색 점은 참고용 시설이며 동선 경로에는 포함되지 않아요.</p>
+      </div>
+
+      <div class="venuebox">
+        <h2 style="font-size:16px; margin-top:18px;">장소 안내 (동선 메모) <small>모두와 공유됨</small></h2>
+        <div id="venueRows"></div>
+        <button class="btn small secondary" id="addVenueRow" style="margin-top:4px;">+ 장소 추가</button>
+      </div>
+
+      <div class="sharebox">
+        <h2 style="font-size:16px;">이미지로 공유하기</h2>
+        <p class="hint" style="margin-top:-6px;">일정을 확정하면 스레드나 SNS에 바로 올릴 수 있는 카드 이미지를 만들어드려요.</p>
+        <div class="row-inline" style="margin-bottom:6px;">
+          <button class="btn small" id="btnMakeCard">공유 카드 이미지 만들기</button>
+        </div>
+        <div class="shareimgwrap" id="shareImgWrap"></div>
+      </div>
+
+      <div class="sharebox">
+        <h2 style="font-size:16px;">링크로 공유하기</h2>
+        <p class="hint" style="margin-top:-6px;">일정을 확정하면 이 일정이 담긴 링크를 만들어드려요. 링크를 받은 사람이 열면 바로 이 일정을 볼 수 있고, 원하면 자기 계획으로 불러올 수 있어요. (서버 없이 링크 자체에 일정이 담겨요 — 링크를 보낸 뒤 내가 계획을 바꿔도 상대방 화면은 자동으로 갱신되지 않아요.)</p>
+        <div class="row-inline" style="margin-bottom:10px;">
+          <button class="btn small secondary" id="btnShare">공유 링크 만들기</button>
+        </div>
+        <div id="shareResult"></div>
+        <div class="row-inline" style="margin-top:10px;">
+          <input id="loadCode" type="text" placeholder="공유 링크 붙여넣기" style="background:var(--ridge-950);border:1px solid var(--line);color:var(--stone-100);border-radius:3px;padding:8px 10px; flex:1; min-width:140px;">
+          <button class="btn small secondary" id="btnLoadCode">링크 불러오기</button>
+        </div>
+      </div>
+
+      <div id="shareCardHolder"></div>
+
+      <div class="row-inline" style="margin-top:16px;">
+        <button class="btn small secondary" id="exportPlan">내 일정 텍스트로 보기</button>
+        <button class="btn small danger" id="resetAll">전체 초기화</button>
+      </div>
+      <pre id="exportBox" style="display:none; white-space:pre-wrap; background:var(--ridge-950); border:1px solid var(--line); border-radius:3px; padding:10px; font-size:12.5px; margin-top:10px;"></pre>
+    </section>
+  </div>
+</div>
+
+<script>
+if(!window.storage){
+  // Fallback for hosting outside the Claude artifact runtime: same get/set(key, value, shared)
+  // contract, backed by this browser's localStorage. Not shared across devices/people — see
+  // the "공유 코드" limitation this implies.
+  window.storage = {
+    async get(key){ try{ const v = localStorage.getItem('umff:'+key); return v===null ? null : {value:v}; }catch(e){ return null; } },
+    async set(key, value){ try{ localStorage.setItem('umff:'+key, value); return true; }catch(e){ return null; } }
+  };
+}
+(function(){
+  const DATES = ["2026-09-18","2026-09-19","2026-09-20","2026-09-21","2026-09-22"];
+  const DEFAULT_VENUES = {
+    "UC":  "움프 시네마 · 개폐막식 전용, 비지정좌석",
+    "AC1": "알프스 시네마1 · 실내 지정좌석, 외부음식 반입 불가",
+    "AC2": "알프스 시네마2 · 실내 지정좌석, 외부음식 반입 불가",
+    "HC":  "언덕 극장 · 헤드폰 극장, 비지정좌석",
+    "CC":  "카페 뒤 극장 · 무성영화+공연, 비지정좌석",
+    "TC1": "텐트 극장1 · 텐트당 8인, 예매 시 텐트 지정",
+    "TC2": "텐트 극장2 · 텐트당 8인, 예매 시 텐트 지정",
+    "TC3": "텐트 극장3 · 텐트당 8인, 예매 시 텐트 지정",
+    "DC":  "데크 극장 · 헤드폰 극장, 비지정좌석",
+    "FC":  "숲속 극장 · 스크린 없는 AR글래스 1인 극장",
+    "CBC": "차박 극장 · 드라이브인 상영, 9/19~9/20만 운영",
+    "HS":  "힐링 스테이지 · 요가·명상 등 체험 프로그램 장소",
+    "SQ":  "광장 · 상시체험부스·포스터존·미니스테이지 인근",
+    "MS":  "미니 스테이지 · 소공연장",
+    "DG":  "등억꽃향 · 전시 공간(UMCA 2026 전시 등)",
+    "SR":  "세미나실 · 포럼·라운드테이블 진행 공간"
+  };
+  const VENUE_POS = {
+    "TC1":[80,350], "TC2":[89,370], "TC3":[98,390], "MS":[138,490],
+    "HC":[386,186], "AC1":[628,411], "UC":[766,507], "CC":[621,246],
+    "HS":[749,355], "AC2":[896,283], "DC":[966,386], "FC":[930,184],
+    "CBC":[725,63], "SQ":[560,553]
+  };
+  const LANDMARKS = [
+    ["입구",39,551], ["기념품샵",256,476], ["식음료부스",399,478], ["움프 놀이터",237,418],
+    ["포스터존",437,623], ["산악문화관",531,406], ["옥상쉼터",763,304], ["영상체험관",802,386],
+    ["게스트데스크",858,444], ["국제클라이밍장",911,222], ["숲속쉼터",918,48]
+  ];
+
+  let catalog = [];          // shared: {id,date,start,end,venue,title,detail}
+  let myPicks = {};          // personal: {date: [id,...]}
+  let confirmed = {};        // personal: {date: true/false}
+  let venues = {};           // shared: code -> note
+  let currentDate = DATES[0];
+  let uid = 1;
+  let openDetailId = null;
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const toMin = (t) => { if(!t) return null; const [h,m]=t.split(':').map(Number); return h*60+m; };
+  const toClock = (min) => { const h=Math.floor(min/60)%24, m=min%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); };
+  const fmtDate = (d) => new Date(d+"T00:00:00").toLocaleDateString('ko-KR', {month:'long', day:'numeric', weekday:'short'});
+  const fmtDateShort = (d) => new Date(d+"T00:00:00").toLocaleDateString('ko-KR', {month:'numeric', day:'numeric', weekday:'short'});
+
+  async function safeGet(key, shared){ try{ const r = await window.storage.get(key, shared); return r ? r.value : null; }catch(e){ return null; } }
+  async function safeSet(key, value, shared){ try{ return await window.storage.set(key, value, shared); }catch(e){ console.error('save failed', key, e); return null; } }
+
+  async function loadAll(){
+    const c = await safeGet('catalog', true);
+    catalog = c ? JSON.parse(c) : [];
+    if(catalog.length===0){ catalog = buildDefaultCatalog(); await safeSet('catalog', JSON.stringify(catalog), true); }
+    const v = await safeGet('venues', true);
+    venues = v ? JSON.parse(v) : {};
+    if(Object.keys(venues).length===0){ venues = {...DEFAULT_VENUES}; }
+    const p = await safeGet('mypicks', false);
+    myPicks = p ? JSON.parse(p) : {};
+    const cf = await safeGet('confirmed', false);
+    confirmed = cf ? JSON.parse(cf) : {};
+    uid = catalog.reduce((m,x)=>Math.max(m,x.id||0),0) + 1;
+  }
+  async function saveCatalog(){ await safeSet('catalog', JSON.stringify(catalog), true); }
+  async function saveVenues(){ await safeSet('venues', JSON.stringify(venues), true); }
+  async function saveMyPicks(){ await safeSet('mypicks', JSON.stringify(myPicks), false); }
+  async function saveConfirmed(){ await safeSet('confirmed', JSON.stringify(confirmed), false); }
+
+  function parseBulkLine(line){
+    const parts = line.split('|').map(s=>s.trim());
+    const timePart = parts[0] || '';
+    let start=null, end=null;
+    const rangeMatch = timePart.match(/(\d{1,2}:\d{2})\s*[-~]\s*(\d{1,2}:\d{2})/);
+    const singleMatch = timePart.match(/(\d{1,2}:\d{2})/);
+    if(rangeMatch){ start=rangeMatch[1]; end=rangeMatch[2]; } else if(singleMatch){ start=singleMatch[1]; }
+    if(!start) return null;
+    const venue = (parts[1]||'').toUpperCase();
+    const title = parts[2] || '(제목 없음)';
+    const detail = parts[3] || '';
+    return {start, end, venue, title, detail};
+  }
+
+  const DEFAULT_BULK = {
+"2026-09-18": `
+18:00-21:00 | UC | 개막식: 오프닝 공연+개막작 <K2: 그림자를 따라서>+개막 공연 | 등급 A · 공연
+24:00 | UC | 비박 상영: 아드레날린 질주 | 등급 12
+12:00 | AC1 | 국제경쟁: 산이라는 무대 | 등급 A
+15:00 | AC1 | 파타고니아: 30년의 기록 | 움프토크
+11:00 | AC2 | 사라진 나무 | 등급 12
+14:00 | AC2 | 프로스트 이야기 | 등급 A
+11:30 | HC | 자연: 땅의 기억 | 등급 A
+24:00 | HC | 비박 상영: 민낯의 시간 | 등급 15
+10:00 | TC1 | 블록 5 | 등급 A
+13:00 | TC1 | 화이트 스노우 | 등급 A
+10:30 | TC2 | K2의 실종 | 등급 A
+13:30 | TC2 | 산속의 대화 | 등급 A
+11:00 | TC3 | 남극에서 온 편지 | 등급 A
+14:00 | TC3 | 공순이 | 등급 A · 게스트와의 만남
+12:30 | DC | 알레시 쿠나베르의 초상 | 등급 A
+21:00-22:00 | CC | 밤빛 러닝 |
+22:00-23:00 | CC | 밤빛 요가 |
+12:30-14:00 | HS | 쿠키를 통해 슬로베니아를 만나다 |
+15:30-17:00 | HS | 아슬아슬 슬랙라인 |
+10:00-19:00 | SQ | 상시체험 |
+12:00-13:00 | SQ | 영남알프스 따라 숲여행 |
+15:00-16:00 | SQ | 영남알프스 따라 숲여행 |
+16:30 | SQ | 버블드래곤 | 공연
+21:00 | SQ | 후피밴드 | 공연
+13:30 | MS | 길기판 |
+11:00-18:00 | DG | UMCA 2026 전시 |
+11:00-18:00 | DG | 산을 보며, 나를 마주하다 |
+`,
+"2026-09-19": `
+10:00-13:00 | UC | 하이브리드 레이스 |
+15:30 | UC | <내일의 민재> + 까치산 & 신인류 | 등급 A · 공연+게스트와의 만남
+24:00 | UC | 비박 상영: 멈추지 않는다 | 등급 12
+10:30 | AC1 | 투게더: 온기의 이름? '초록' | 등급 A · 게스트와의 만남
+13:30 | AC1 | 공순이 | 등급 A · 게스트와의 만남
+16:30 | AC1 | 코야반 이야기 | 등급 A · 게스트와의 만남
+19:30 | AC1 | 눈 위의 질주 | 등급 12 · 게스트와의 만남
+10:00 | AC2 | 첫 문장의 용기: 산악전기작가가 말하는 AI시대 글쓰기의 시작과 완성 | 움프토크
+13:00 | AC2 | 키케츠 | 등급 A · 게스트와의 만남
+16:00 | AC2 | 산은 변하지 않는다 | 등급 12 · 게스트와의 만남
+19:30 | AC2 | 잃어버린 뿌리 | 등급 A · 게스트와의 만남
+10:00 | HC | 헬로, 빌바오-비스카이아!: 살아있는 유산 | 등급 A · 게스트와의 만남
+12:30 | HC | 남극에서 온 편지 | 등급 A · 움프토크
+15:30 | HC | 미로 | 등급 12 · 게스트와의 만남
+19:30 | HC | 회생 | 등급 12 · 게스트와의 만남
+24:00 | HC | 비박 상영: 지금, 숲에서는 | 등급 12
+10:30 | TC1 | 가족 치료 | 등급 15
+15:00 | TC1 | 스페이스 카우보이 | 등급 12
+19:00 | TC1 | 헬로, 빌바오-비스카이아!: 바람을 가르며 | 등급 A · 상영전 해설
+11:00 | TC2 | 숨겨진 계곡 | 등급 A
+15:30 | TC2 | 투게더: 뿜뿜! 물보라를 일으켜~! | 등급 12
+19:30 | TC2 | 셰르파 | 등급 15
+11:30 | TC3 | 협곡 탐험 | 등급 A
+16:00 | TC3 | 심연 속으로 | 등급 12
+20:00 | TC3 | 화이트 스노우 | 등급 A
+09:00-10:30 | DC | 싱잉볼 치유명상 |
+11:30 | DC | 투게더: 마음, 섭씨 36.5도 | 등급 12 · 게스트와의 만남
+15:30 | DC | 판타스틱 판타! | 등급 A
+19:00 | DC | 헬로, 빌바오-비스카이아!: 탐험의 확장 | 등급 A · 게스트와의 만남
+10:00-11:30 | CC | 세계를 잇는 꿀벌, 자연을 잇는 밀랍 |
+12:30 | CC | 극단 '이상한 움직임' | 공연
+19:00 | CC | 율리안 알프스 - 슬로베니아의 밤 | 등급 A · 공연
+21:30-23:00 | CC | 싱잉볼 치유명상 |
+10:30 | FC | 자연: 땅의 기억 | 등급 A
+14:00 | FC | 국제경쟁: 산이라는 무대 | 등급 A
+17:00 | FC | 자연: 땅의 기억 | 등급 A
+24:00 | CBC | 차박 상영: 낯익은 지옥 | 등급 15
+10:00 | SR | 학생 산악연맹 라운드 테이블 | 움프토크
+14:00 | SR | 산악문화 포럼: 글과 경험의 변주 | 움프토크
+17:00 | SR | 2026 대한산악연맹 히말라야 사트피크(SAT PEAK) 원정대 | 움프토크
+13:00-14:30 | HS | 영화의 감정을 향기와 꽃으로 기록하다 |
+16:00-17:30 | HS | 아슬아슬 슬랙라인 |
+10:00-19:00 | SQ | 상시체험 |
+12:00-13:00 | SQ | 영남알프스 따라 숲여행 |
+15:00-16:00 | SQ | 영남알프스 따라 숲여행 |
+19:00-20:00 | SQ | 영남알프스 따라 숲여행 |
+18:00 | SQ | 움프 보물창고 |
+21:30 | SQ | 데이브 유 | 공연
+11:30 | MS | 움프 무대인사 | 움프토크
+13:00 | MS | 모린 | 공연
+15:00 | MS | 움프 무대인사 | 움프토크
+17:00 | MS | 움프 무대인사 | 움프토크
+11:00-18:00 | DG | UMCA 2026 전시 |
+11:00-18:00 | DG | 산을 보며, 나를 마주하다 |
+`,
+"2026-09-20": `
+10:00-13:00 | UC | 하이브리드 레이스 |
+16:00 | UC | <마리안의 마지막 도전> + 송소희 | 등급 A · 공연+게스트와의 만남
+10:30 | AC1 | 움프멘터리 | 등급 12 · 게스트와의 만남
+13:30 | AC1 | 산 사람 | 등급 A · 게스트와의 만남
+17:00 | AC1 | 움프서밋: 인생의 사계 | 등급 A · 게스트와의 만남
+20:00 | AC1 | 우리들의 도반, 신나리 | 등급 12 · 움프토크
+10:00 | AC2 | 산의 전사들 | 등급 12 · 움프토크
+13:30 | AC2 | 프로스트 이야기 | 등급 A · 움프토크
+17:00 | AC2 | 마지막 라마 | 등급 A · 움프토크
+19:30 | AC2 | 목사 안야 | 등급 A · 게스트와의 만남
+10:00 | HC | 투게더: 다정한 마음의 정경 | 등급 12 · 게스트와의 만남
+12:30 | HC | 너를 향한 3000km | 등급 15 · 게스트와의 만남
+15:30 | HC | 코리안 웨이브: 머무르기, 나아가기 | 등급 12 · 게스트와의 만남
+20:00 | HC | 코리안 웨이브: 말없는 존재들에게 건네는 안부 | 등급 12 · 게스트와의 만남
+10:30 | TC1 | 국제경쟁: 꿈의 도전 | 등급 A
+15:00 | TC1 | 셰르파 | 등급 15
+19:00 | TC1 | 헬로, 빌바오-비스카이아!: 시간 여행 | 등급 A · 상영전 해설
+11:00 | TC2 | 산속의 대화 | 등급 A
+15:30 | TC2 | 내일의 민재 | 등급 A
+19:30 | TC2 | 잃어버린 뿌리 | 등급 A
+11:30 | TC3 | 텐 | 등급 A · 움프토크
+16:00 | TC3 | 인간: 길 위의 성장 | 등급 A · 움프토크
+20:00 | TC3 | 코야반 이야기 | 등급 A
+12:30 | DC | 심연 속으로 | 등급 12 · 게스트와의 만남
+16:00 | DC | 노크 | 등급 15 · 게스트와의 만남
+19:30 | DC | 코리안 웨이브: 이어지는 마음 | 등급 A · 게스트와의 만남
+10:00-11:30 | CC | 쿠키를 통해 슬로베니아를 만나다 |
+13:00 | CC | 더블엠 | 공연
+15:30-17:00 | CC | 세계를 잇는 꿀벌, 자연을 잇는 밀랍 |
+19:30 | CC | 손님 접대법 | 등급 A · 공연
+21:30-23:00 | CC | 싱잉볼 치유명상 |
+10:30 | FC | 산: 각자의 정상 | 등급 12
+14:00 | FC | 국제경쟁: 지속 가능한 내일 | 등급 A
+17:00 | FC | 산: 각자의 정상 | 등급 12
+21:00 | CBC | 빌리 | 등급 A · 영화+체험
+24:00 | CBC | 차박 상영: 오컬트로의 초대 | 등급 15
+12:00 | SR | 2026 카라코람과 히말라야, 학생 원정대의 6천 미터 기록 | 움프토크
+13:00-14:30 | HS | 영화의 감정을 향기와 꽃으로 기록하다 |
+16:00-17:30 | HS | 아슬아슬 슬랙라인 |
+10:00-19:00 | SQ | 상시체험 |
+12:00-13:00 | SQ | 영남알프스 따라 숲여행 |
+15:00-16:00 | SQ | 영남알프스 따라 숲여행 |
+19:00-20:00 | SQ | 영남알프스 따라 숲여행 |
+18:00 | SQ | 움프 보물창고 |
+21:00 | SQ | 더사운드스테이지앙상블 (김주원) | 공연
+12:30 | MS | 움프 무대인사 | 움프토크
+15:00 | MS | 움프 무대인사 | 움프토크
+15:30 | MS | 무드리스트 | 공연
+17:30 | MS | 움프 무대인사 | 움프토크
+11:00-18:00 | DG | UMCA 2026 전시 |
+14:00 | DG | "떠오르는 히말라야의 영웅들" 북토크 | 움프토크
+`,
+"2026-09-21": `
+10:30 | UC | 투게더: 빅 풋 주니어 | 등급 A · 게스트와의 만남
+13:30 | UC | 투게더: 온기의 이름? '초록' | 등급 A · 움프토크
+19:00 | UC | <전설의 라이트닝 할배> + 카더가든 | 등급 12 · 공연
+10:00 | AC1 | 아코디언 도어 | 등급 12 · 게스트와의 만남
+14:00 | AC1 | 투게더: 뿜뿜! 물보라를 일으켜~! | 등급 12
+16:30 | AC1 | 판타스틱 판타! | 등급 A
+19:30 | AC1 | 은광 | 등급 A · 게스트와의 만남
+10:30 | AC2 | K2: 그림자를 따라서 | 등급 A
+14:00 | AC2 | 손님 접대법 | 등급 A · 공연
+16:30 | AC2 | 회생 | 등급 12 · 움프토크
+20:00 | AC2 | 제이슨의 나무 상자 | 등급 A · 움프토크
+10:00 | HC | 헬로, 빌바오-비스카이아!: 탐험의 확장 | 등급 A · 상영전 해설
+12:30 | HC | 헬로, 빌바오-비스카이아!: 살아있는 유산 | 등급 A · 상영전 해설
+15:00 | HC | 헬로, 빌바오-비스카이아!: 바람을 가르며 | 등급 A · 게스트와의 만남
+18:00 | HC | 헬로, 빌바오-비스카이아!: 시간 여행 | 등급 A · 게스트와의 만남
+10:00 | TC1 | K2의 실종 | 등급 A
+15:00 | TC1 | 황금 골짜기의 챔피언들 | 등급 A
+18:00 | TC1 | 마지막 라마 | 등급 A
+10:30 | TC2 | 안녕, 키케츠 | 등급 A
+15:30 | TC2 | 텐 | 등급 A · 움프토크
+18:30 | TC2 | 알레시 쿠나베르의 초상 | 등급 A
+11:00 | TC3 | 산 사람 | 등급 A · 게스트와의 만남
+16:00 | TC3 | 인간: 길 위의 성장 | 등급 A · 움프토크
+19:00 | TC3 | 움프서밋: 인생의 사계 | 등급 A · 게스트와의 만남
+11:30 | DC | 코리안 웨이브: 머무르기, 나아가기 | 등급 12 · 게스트와의 만남
+14:30 | DC | 움프멘터리 | 등급 12 · 게스트와의 만남
+18:00 | DC | 마법의 정원 이야기 | 등급 A
+12:30 | CC | 엉클키드 | 공연
+19:00 | CC | 국제경쟁: 절박한 노력 | 등급 A · 게스트와의 만남
+11:00 | FC | 코리안 웨이브: 이어지는 마음 | 등급 A
+14:00 | FC | 산: 각자의 정상 | 등급 12
+17:00 | FC | 코리안 웨이브: 이어지는 마음 | 등급 A
+10:00-11:30 | HS | 아슬아슬 슬랙라인 |
+13:00-14:30 | HS | 세계를 잇는 꿀벌, 자연을 잇는 밀랍 |
+10:00-19:00 | SQ | 상시체험 |
+12:00-13:00 | SQ | 영남알프스 따라 숲여행 |
+15:00-16:00 | SQ | 영남알프스 따라 숲여행 |
+19:00-20:00 | SQ | 영남알프스 따라 숲여행 |
+22:00 | SQ | 최예슬 | 공연
+12:00 | MS | 움프 무대인사 | 움프토크
+15:00 | MS | 움프 무대인사 | 움프토크
+16:30 | MS | 이재홍 | 공연
+18:00 | MS | 움프 무대인사 | 움프토크
+11:00-18:00 | DG | UMCA 2026 전시 |
+11:00-18:00 | DG | 산을 보며, 나를 마주하다 |
+`,
+"2026-09-22": `
+9:30 | UC | 투게더: 빅 풋 주니어 | 등급 A · 게스트와의 만남
+18:00 | UC | 폐막식: <여전히 항해 중> + 폐막 공연 | 등급 A · 공연
+10:00 | AC1 | 아코디언 도어 | 등급 12
+13:00 | AC1 | 마리안의 마지막 도전 | 등급 A
+16:00 | AC1 | 숲의 속삭임 | 등급 A
+10:30 | AC2 | 황금 골짜기의 챔피언들 | 등급 A
+13:00 | AC2 | 너를 향한 3000km | 등급 15
+16:00 | AC2 | 산불 진화대 2045 | 등급 12
+11:00 | HC | 마법의 정원 이야기 | 등급 A
+13:30 | HC | 제이슨의 나무 상자 | 등급 A · 게스트와의 만남
+10:00 | TC1 | 은광 | 등급 A
+15:00 | TC1 | 블록 5 | 등급 A
+10:30 | TC2 | 국제경쟁: 지속 가능한 내일 | 등급 A
+15:30 | TC2 | 목사 안야 | 등급 A
+11:00 | TC3 | 도반 | 등급 A · 게스트와의 만남
+16:00 | TC3 | 투게더: 마음, 섭씨 36.5도 | 등급 12 · 게스트와의 만남
+11:30 | DC | 산은 변하지 않는다 | 등급 12
+14:00 | DC | 숨겨진 계곡 | 등급 A
+11:00 | FC | 투게더: 다정한 마음의 정경 | 등급 12
+14:00 | FC | 코리안 웨이브: 말없는 존재들에게 건네는 안부 | 등급 12
+10:00-11:30 | HS | 아슬아슬 슬랙라인 |
+13:00-14:30 | HS | 영화의 감정을 향기와 꽃으로 기록하다 |
+10:00-19:00 | SQ | 상시체험 |
+12:00-13:00 | SQ | 영남알프스 따라 숲여행 |
+13:30 | SQ | 스튜디오 감탄호 | 공연
+15:00-16:00 | SQ | 영남알프스 따라 숲여행 |
+12:00 | MS | 움프 무대인사 | 움프토크
+16:30 | MS | 홍진표 트리오 | 공연
+11:00-18:00 | DG | UMCA 2026 전시 |
+11:00-18:00 | DG | 산을 보며, 나를 마주하다 |
+`
+  };
+
+  function buildDefaultCatalog(){
+    let id = 1; const out = [];
+    Object.keys(DEFAULT_BULK).forEach(date=>{
+      DEFAULT_BULK[date].split('\n').map(l=>l.trim()).filter(Boolean).forEach(line=>{
+        const parsed = parseBulkLine(line);
+        if(parsed) out.push({id: id++, date, ...parsed});
+      });
+    });
+    return out;
+  }
+
+  function picksFor(date){ return myPicks[date] || []; }
+  function isPicked(date, id){ return picksFor(date).includes(id); }
+  function markDirty(date){ confirmed[date] = false; saveConfirmed(); }
+
+  function renderDateBar(){
+    const bar = $('datebar'); bar.innerHTML = '';
+    DATES.forEach(d=>{
+      const count = catalog.filter(p=>p.date===d).length;
+      const btn = document.createElement('button');
+      btn.className = 'datebtn' + (d===currentDate?' active':'');
+      btn.innerHTML = fmtDateShort(d) + '<span class="cnt">' + count + '개</span>';
+      btn.onclick = () => { currentDate = d; openDetailId=null; renderAll(); };
+      bar.appendChild(btn);
+    });
+  }
+
+  function renderProgList(){
+    $('dateLabel').textContent = fmtDate(currentDate);
+    const list = catalog.filter(p=>p.date===currentDate).sort((a,b)=>toMin(a.start)-toMin(b.start));
+    $('progCount').textContent = list.length;
+    $('planCount').textContent = picksFor(currentDate).length;
+    const el = $('proglist'); el.innerHTML = '';
+    if(list.length===0){ el.innerHTML = '<div class="empty">아직 등록된 프로그램이 없어요.<br>위에서 프로그램을 추가해보세요.</div>'; return; }
+    list.forEach(p=>{
+      const picked = isPicked(currentDate, p.id);
+      const card = document.createElement('div'); card.className = 'card';
+      card.innerHTML = `
+        <div class="cardtop">
+          <div class="time">${p.start}${p.end ? '<small>~ '+p.end+'</small>' : ''}</div>
+          <div class="meta">
+            <div class="title" data-id="${p.id}" data-act="detail">${esc(p.title)}</div>
+            ${p.venue ? '<span class="venue">'+esc(p.venue)+'</span>' : ''}
+          </div>
+          <div class="actions">
+            <button class="btn small ${picked?'secondary':''}" data-id="${p.id}" data-act="toggle">${picked?'담김 ✓':'담기'}</button>
+            <button class="removeicon" data-id="${p.id}" data-act="del" title="삭제" aria-label="삭제">✕</button>
+          </div>
+        </div>
+        <div class="detail ${openDetailId===p.id?'open':''}" data-detail="${p.id}">${esc(p.detail) || '상세 설명이 없어요.'}</div>`;
+      el.appendChild(card);
+    });
+    el.querySelectorAll('[data-act="toggle"]').forEach(b=>{ b.onclick = () => toggleInPlan(Number(b.dataset.id)); });
+    el.querySelectorAll('[data-act="del"]').forEach(b=>{ b.onclick = () => deleteProgram(Number(b.dataset.id)); });
+    el.querySelectorAll('[data-act="detail"]').forEach(t=>{ t.onclick = () => { openDetailId = (openDetailId===Number(t.dataset.id)) ? null : Number(t.dataset.id); renderProgList(); }; });
+  }
+
+  function toggleInPlan(id){
+    const arr = myPicks[currentDate] || [];
+    const idx = arr.indexOf(id);
+    if(idx>=0) arr.splice(idx,1); else arr.push(id);
+    myPicks[currentDate] = arr;
+    saveMyPicks(); markDirty(currentDate); renderAll();
+  }
+  function deleteProgram(id){
+    if(!confirm('이 프로그램은 모두와 공유돼요. 삭제할까요?')) return;
+    catalog = catalog.filter(x=>x.id!==id);
+    Object.keys(myPicks).forEach(d=>{ myPicks[d] = (myPicks[d]||[]).filter(x=>x!==id); });
+    saveCatalog(); saveMyPicks(); renderAll();
+  }
+
+  function getPlanItems(date){
+    const ids = picksFor(date);
+    return catalog.filter(p=>p.date===date && ids.includes(p.id)).sort((a,b)=>toMin(a.start)-toMin(b.start));
+  }
+  function withConflicts(items){
+    const withRange = items.map(p=>{ const s=toMin(p.start); const e=p.end?toMin(p.end):s+90; return {...p, s, e, estimated: !p.end}; });
+    withRange.forEach((p,i)=>{ p.conflict=false; withRange.forEach((q,j)=>{ if(i!==j && p.s<q.e && q.s<p.e) p.conflict=true; }); });
+    return withRange;
+  }
+
+  function renderTimeline(){
+    $('planDateLabel').textContent = fmtDate(currentDate);
+    const items = getPlanItems(currentDate);
+    const tl = $('timeline'); tl.innerHTML = '';
+    const banner = $('statusBanner');
+
+    if(items.length===0){
+      tl.innerHTML = '<div class="empty">이 날짜에 담은 프로그램이 없어요.<br>왼쪽에서 "담기"를 눌러보세요.</div>';
+      banner.innerHTML = '';
+      renderMap([]);
+      updateShareUI(false);
+      return;
+    }
+    const withRange = withConflicts(items);
+    const conflictCount = withRange.filter(p=>p.conflict).length;
+
+    if(conflictCount>0){
+      banner.innerHTML = `<div class="banner bad">⚠ 시간이 겹치는 프로그램이 ${conflictCount}개 있어요. 빨간 항목을 조정한 뒤 확정해주세요. 겹치는 상태에서는 저장할 수 없어요.</div>`;
+    } else if(confirmed[currentDate]){
+      banner.innerHTML = `<div class="banner ok">✓ 이 날짜 일정이 확정·저장됐어요.</div>`;
+    } else {
+      banner.innerHTML = `<div class="banner ok">겹치는 시간 없이 정리됐어요. "일정 확정하고 저장"을 눌러주세요.</div>`;
+    }
+
+    let lastVenue = null;
+    withRange.forEach(p=>{
+      if(lastVenue !== null && p.venue && p.venue !== lastVenue){
+        const moveDiv = document.createElement('div'); moveDiv.className = 'movetag';
+        moveDiv.textContent = `→ 이동: ${lastVenue} → ${p.venue}` + (venues[p.venue] ? ` (${venues[p.venue]})` : '');
+        tl.appendChild(moveDiv);
+      }
+      lastVenue = p.venue || lastVenue;
+      const item = document.createElement('div'); item.className = 'tl-item' + (p.conflict?' conflict':'');
+      item.innerHTML = `
+        <div class="t">${p.start}</div><div class="dot"></div>
+        <div class="tl-card">
+          <div class="title">${esc(p.title)}</div>
+          <div class="venue">${p.venue ? esc(p.venue) + (venues[p.venue] ? ' · '+esc(venues[p.venue]) : '') : '장소 미정'} · ${p.start}${p.end ? '~'+p.end : (' (~'+toClock(p.e)+' 추정)')}</div>
+          ${p.conflict ? '<span class="conflictflag">다른 프로그램과 시간 겹침</span>' : ''}
+        </div>`;
+      tl.appendChild(item);
+    });
+
+    renderMap(withRange);
+    updateShareUI(conflictCount===0 && confirmed[currentDate]===true);
+  }
+
+  function renderMap(items){
+    const W=1000,H=700;
+    const known = items.filter(p=>VENUE_POS[p.venue]);
+    let nodes = '', lines = '', landmarks = '';
+    LANDMARKS.forEach(([label,x,y])=>{
+      landmarks += `<circle cx="${x}" cy="${y}" r="5" fill="#3a4a45"/><text x="${x}" y="${y-9}" font-size="9" fill="#8a948f" text-anchor="middle" font-family="Plus Jakarta Sans">${label}</text>`;
+    });
+    Object.keys(VENUE_POS).forEach(code=>{
+      const [x,y]=VENUE_POS[code];
+      nodes += `<circle cx="${x}" cy="${y}" r="16" fill="#1b2422" stroke="#4FD9A8" stroke-width="1.5"/><text x="${x}" y="${y+4}" font-size="12" fill="#c7cdc3" text-anchor="middle" font-family="Archivo Narrow">${code}</text>`;
+    });
+    let path = '';
+    known.forEach((p,i)=>{
+      const [x,y]=VENUE_POS[p.venue];
+      if(i>0){ const [px,py]=VENUE_POS[known[i-1].venue]; path += `<line x1="${px}" y1="${py}" x2="${x}" y2="${y}" stroke="#3FC6E8" stroke-width="2" stroke-dasharray="6,5"/>`; }
+    });
+    known.forEach((p,i)=>{
+      const [x,y]=VENUE_POS[p.venue];
+      lines += `<circle cx="${x}" cy="${y}" r="12" fill="#3FC6E8"/><text x="${x}" y="${y+4}" font-size="12" fill="#0a1112" text-anchor="middle" font-weight="700" font-family="Archivo Narrow">${i+1}</text>`;
+    });
+    const svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%; height:auto; display:block;">
+      <rect x="0" y="0" width="${W}" height="${H}" fill="#0a1112"/>
+      ${landmarks}${nodes}${path}${lines}
+    </svg>`;
+    $('mapSvgHolder').innerHTML = svg;
+  }
+
+  function updateShareUI(canShare){
+    $('btnShare').disabled = !canShare;
+  }
+
+  $('btnConfirm').onclick = () => {
+    const items = getPlanItems(currentDate);
+    if(items.length===0){ alert('담은 프로그램이 없어요.'); return; }
+    const withRange = withConflicts(items);
+    const hasConflict = withRange.some(p=>p.conflict);
+    if(hasConflict){ alert('겹치는 일정이 있어 저장할 수 없어요. 빨간 항목을 확인해주세요.'); confirmed[currentDate]=false; saveConfirmed(); renderTimeline(); return; }
+    confirmed[currentDate] = true; saveConfirmed(); renderTimeline();
+  };
+
+  function renderVenueRows(){
+    const box = $('venueRows'); box.innerHTML = '';
+    Object.keys(venues).forEach(code=>{
+      const row = document.createElement('div'); row.className = 'vrow';
+      row.innerHTML = `
+        <input class="code" value="${esc(code)}" data-orig="${esc(code)}" data-field="code">
+        <input class="name" placeholder="위치 설명" value="${esc(venues[code])}" data-orig="${esc(code)}" data-field="name">
+        <button class="removeicon" data-orig="${esc(code)}" data-act="delvenue" title="삭제" aria-label="삭제">✕</button>`;
+      box.appendChild(row);
+    });
+    box.querySelectorAll('input[data-field="name"]').forEach(inp=>{ inp.onchange = () => { venues[inp.dataset.orig]=inp.value; saveVenues(); renderTimeline(); }; });
+    box.querySelectorAll('input[data-field="code"]').forEach(inp=>{
+      inp.onchange = () => {
+        const orig = inp.dataset.orig, val = inp.value.trim();
+        if(!val || val===orig) return;
+        const note = venues[orig]; delete venues[orig]; venues[val]=note;
+        catalog.forEach(p=>{ if(p.venue===orig) p.venue=val; });
+        saveVenues(); saveCatalog(); renderAll();
+      };
+    });
+    box.querySelectorAll('[data-act="delvenue"]').forEach(b=>{ b.onclick = () => { delete venues[b.dataset.orig]; saveVenues(); renderAll(); }; });
+  }
+
+  function renderAll(){ renderDateBar(); renderProgList(); renderTimeline(); renderVenueRows(); }
+
+  $('btnRefresh').onclick = async () => { await loadAll(); renderAll(); };
+
+  $('btnQuickAdd').onclick = () => { $('quickAddForm').style.display = $('quickAddForm').style.display==='none'?'block':'none'; $('bulkAddForm').style.display='none'; };
+  $('btnBulkAdd').onclick = () => { $('bulkAddForm').style.display = $('bulkAddForm').style.display==='none'?'block':'none'; $('quickAddForm').style.display='none'; };
+
+  $('qa-submit').onclick = async () => {
+    const start=$('qa-start').value, end=$('qa-end').value, venue=$('qa-venue').value.trim().toUpperCase(), title=$('qa-title').value.trim(), detail=$('qa-detail').value.trim();
+    if(!start || !title){ alert('시작 시간과 프로그램명은 필수예요.'); return; }
+    catalog.push({id: uid++, date: currentDate, start, end: end||null, venue, title, detail});
+    if(venue && !(venue in venues)) venues[venue] = '';
+    $('qa-start').value=''; $('qa-end').value=''; $('qa-venue').value=''; $('qa-title').value=''; $('qa-detail').value='';
+    await saveCatalog(); await saveVenues(); renderAll();
+  };
+
+  $('bulk-submit').onclick = async () => {
+    const lines = $('bulk-text').value.split('\n').map(l=>l.trim()).filter(Boolean);
+    let added = 0;
+    lines.forEach(line=>{
+      const parsed = parseBulkLine(line);
+      if(!parsed) return;
+      catalog.push({id: uid++, date: currentDate, ...parsed});
+      if(parsed.venue && !(parsed.venue in venues)) venues[parsed.venue] = '';
+      added++;
+    });
+    $('bulk-text').value='';
+    if(added>0){ await saveCatalog(); await saveVenues(); renderAll(); }
+    else alert('시간 형식을 인식하지 못했어요. "09:30-11:00 | UC | 제목" 형식을 확인해주세요.');
+  };
+
+  $('addVenueRow').onclick = () => {
+    let n=1, code='NEW'+n; while(code in venues){ n++; code='NEW'+n; }
+    venues[code]=''; saveVenues(); renderVenueRows();
+  };
+
+  // ponytail: share payload drops `detail` (synopsis) and isn't compressed, to keep the URL
+  // short/reliable — fine for a day's picks, would need LZ-string or similar if link length
+  // ever becomes a real problem for power users.
+  function buildShareUrl(){
+    const items = getPlanItems(currentDate);
+    const payload = { date: currentDate, items: items.map(p=>({id:p.id, start:p.start, end:p.end||null, venue:p.venue||'', title:p.title})) };
+    const params = new URLSearchParams();
+    params.set('plan', JSON.stringify(payload));
+    return location.origin + location.pathname + '?' + params.toString();
+  }
+
+  function applyLoadedPlan(payload){
+    if(!payload || !payload.date || !Array.isArray(payload.items)){ alert('링크에서 일정 정보를 읽지 못했어요.'); return; }
+    const resolved = payload.items.map(it=>({ it, existing: catalog.find(p=>p.date===payload.date && p.start===it.start && p.venue===it.venue && p.title===it.title) }));
+    const current = myPicks[payload.date]||[];
+    const sameSet = resolved.every(r=>r.existing) && current.length===resolved.length && resolved.every(r=>current.includes(r.existing.id));
+    if(current.length>0 && !sameSet && !confirm(fmtDate(payload.date) + ' 날짜에 이미 담아둔 내 일정이 있어요. 불러온 일정으로 덮어쓸까요?')) return;
+    const ids = resolved.map(({it, existing})=>{
+      if(existing) return existing.id;
+      const created = {id: uid++, date: payload.date, start: it.start, end: it.end||null, venue: it.venue||'', title: it.title, detail: ''};
+      catalog.push(created);
+      return created.id;
+    });
+    currentDate = payload.date;
+    myPicks[currentDate] = ids;
+    confirmed[currentDate] = true;
+    saveCatalog(); saveMyPicks(); saveConfirmed();
+    renderAll();
+    if(!sameSet) alert(fmtDate(currentDate) + ' 일정을 불러왔어요.');
+  }
+
+  function parsePlanFromInput(text){
+    text = (text||'').trim();
+    if(!text) return null;
+    try{
+      const url = new URL(text, location.href);
+      const raw = url.searchParams.get('plan');
+      if(raw) return JSON.parse(raw);
+    }catch(e){ /* not a URL — fall through to raw JSON */ }
+    try{ return JSON.parse(text); }catch(e){ return null; }
+  }
+
+  $('btnShare').onclick = () => {
+    if($('btnShare').disabled) return;
+    const url = buildShareUrl();
+    $('shareResult').innerHTML = `
+      <input id="shareUrlBox" type="text" readonly value="${esc(url)}" style="width:100%;background:var(--ridge-950);border:1px solid var(--line);color:var(--stone-100);border-radius:3px;padding:8px 10px;">
+      <div class="row-inline" style="margin-top:6px;"><button class="btn small secondary" id="btnCopyShare">링크 복사</button></div>`;
+    $('shareUrlBox').onclick = () => $('shareUrlBox').select();
+    $('btnCopyShare').onclick = async () => {
+      try{ await navigator.clipboard.writeText(url); $('btnCopyShare').textContent = '복사됨 ✓'; }
+      catch(e){ $('shareUrlBox').select(); alert('자동 복사에 실패했어요. 선택된 링크를 직접 복사해주세요.'); }
+    };
+  };
+
+  $('btnLoadCode').onclick = () => {
+    const payload = parsePlanFromInput($('loadCode').value);
+    if(!payload){ alert('링크에서 일정 정보를 읽지 못했어요. 공유 링크 전체를 붙여넣어주세요.'); return; }
+    applyLoadedPlan(payload);
+  };
+
+  $('btnMakeCard').onclick = async () => {
+    const items = getPlanItems(currentDate);
+    if(items.length===0){ alert('담은 프로그램이 없어요.'); return; }
+    const withRange = withConflicts(items);
+    if(withRange.some(p=>p.conflict)){ alert('겹치는 일정이 있어요. 먼저 정리한 뒤 만들어주세요.'); return; }
+
+    const rows = withRange.map(p => `
+      <div class="sc-row">
+        <div class="sc-time">${p.start}${p.end?'~'+p.end:''}</div>
+        <div>
+          <div class="sc-title">${esc(p.title)}</div>
+          ${p.venue ? '<div class="sc-venue">'+esc(p.venue)+(venues[p.venue]?' · '+esc(venues[p.venue]):'')+'</div>' : ''}
+        </div>
+      </div>`).join('');
+
+    const holder = $('shareCardHolder');
+    holder.innerHTML = `
+      <div class="sharecard" id="scCapture">
+        <p class="kicker">ULSAN ULJU MOUNTAIN FILM FESTIVAL 2026</p>
+        <h3>나의 UMFF 상영 계획</h3>
+        <p class="d">${fmtDate(currentDate)}</p>
+        ${rows}
+        <div class="sc-foot"><span>UMFF 2026 · 09.18–09.22</span><span>#UMFF2026</span></div>
+      </div>`;
+    const target = document.getElementById('scCapture');
+    try{
+      const canvas = await html2canvas(target, {backgroundColor:null, scale:2});
+      const dataUrl = canvas.toDataURL('image/png');
+      $('shareImgWrap').innerHTML = `<img src="${dataUrl}" alt="내 상영 계획 카드"><div class="row-inline" style="margin-top:8px;"><a class="btn small secondary" href="${dataUrl}" download="umff_${currentDate}.png">이미지 다운로드</a></div>`;
+    }catch(e){
+      console.error(e);
+      alert('이미지 생성 중 문제가 생겼어요. 다시 시도해주세요.');
+    }
+  };
+
+  $('exportPlan').onclick = () => {
+    const items = getPlanItems(currentDate);
+    const box = $('exportBox');
+    if(items.length===0){ box.style.display='block'; box.textContent='담은 프로그램이 없어요.'; return; }
+    let txt = fmtDate(currentDate) + ' 내 상영 계획\n\n';
+    items.forEach(p=>{ txt += `${p.start}${p.end?'~'+p.end:''}  [${p.venue||'장소미정'}]  ${p.title}\n`; });
+    box.style.display='block'; box.textContent = txt;
+  };
+
+  $('resetAll').onclick = async () => {
+    if(!confirm('내 담긴 일정과 확정 상태를 모두 초기화할까요? (공유 프로그램 목록은 유지돼요)')) return;
+    myPicks = {}; confirmed = {};
+    await saveMyPicks(); await saveConfirmed();
+    renderAll();
+  };
+
+  $('mtab-list').onclick = () => { $('mtab-list').classList.add('active'); $('mtab-plan').classList.remove('active'); $('panel-list').style.display='block'; $('panel-plan').style.display='none'; };
+  $('mtab-plan').onclick = () => { $('mtab-plan').classList.add('active'); $('mtab-list').classList.remove('active'); $('panel-plan').style.display='block'; $('panel-list').style.display='none'; };
+  function applyMobileDefault(){ if(window.innerWidth<=860){ $('panel-plan').style.display='none'; } }
+
+  (async function init(){
+    $('proglist').innerHTML = '<div class="empty">불러오는 중...</div>';
+    $('timeline').innerHTML = '<div class="empty">불러오는 중...</div>';
+    await loadAll();
+    renderAll();
+    applyMobileDefault();
+    const incoming = new URLSearchParams(location.search).get('plan');
+    if(incoming){
+      try{ applyLoadedPlan(JSON.parse(incoming)); }
+      catch(e){ console.error('공유 링크 파싱 실패', e); alert('공유 링크에서 일정 정보를 읽지 못했어요.'); }
+    }
+  })();
+})();
+</script>
+</body>
+</html>
