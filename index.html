@@ -44,6 +44,13 @@
   .panel h2 small{font-family:'Plus Jakarta Sans'; font-size:12px; font-weight:400; color:var(--stone-300);}
   .mobiletabs{display:none; gap:6px; margin-bottom:12px;}
   @media (max-width:860px){ .mobiletabs{display:flex;} .mtab-hide{display:none;} }
+  .viewtabs{display:flex; gap:6px; margin-bottom:14px;}
+  .viewtabbtn{flex:0 0 auto; padding:9px 16px; border-radius:3px; border:1px solid var(--line); background:transparent; color:var(--stone-300); font-family:'Archivo Narrow'; font-size:15px; font-weight:600; cursor:pointer;}
+  .viewtabbtn.active{background:var(--pink-400); color:var(--ridge-950); border-color:var(--pink-400);}
+  .onsitedate{margin-bottom:18px;}
+  .onsitedate h3{font-family:'Archivo Narrow'; font-size:16px; font-weight:600; color:var(--pink-400); margin:0 0 8px;}
+  .onsitedate ul{margin:0; padding-left:20px;}
+  .onsitedate li{margin-bottom:5px; font-size:13.5px;}
   .mtabbtn{flex:1; padding:9px; border-radius:3px; border:1px solid var(--line); background:transparent; color:var(--stone-300); font-family:'Archivo Narrow'; font-size:15px; font-weight:600; cursor:pointer;}
   .mtabbtn.active{background:var(--moss-500); color:var(--ridge-950); border-color:var(--moss-500);}
   .addbox{border:1px dashed var(--line); border-radius:3px; padding:12px; margin-bottom:14px;}
@@ -65,6 +72,12 @@
   .card .meta{flex:1; min-width:0;}
   .card .title{font-size:14.5px; font-weight:500; word-break:keep-all; cursor:pointer; text-decoration:underline dotted var(--stone-300); text-underline-offset:3px;}
   .card .venue{display:inline-block; margin-top:5px; font-size:11.5px; color:var(--moss-300); border:1px solid var(--moss-500); padding:1px 7px; border-radius:20px;}
+  .onsitetag{display:inline-block; margin-top:5px; margin-left:5px; font-size:11.5px; color:var(--pink-400); border:1px solid var(--pink-400); background:transparent; padding:1px 7px; border-radius:20px; cursor:pointer; font-family:inherit;}
+  .onsitetag.on{background:rgba(232,160,196,0.18);}
+  .onsitebox{border:1px solid var(--pink-400); background:rgba(232,160,196,0.08); border-radius:3px; padding:9px 12px; margin-bottom:10px; font-size:13px;}
+  .onsitebox b{color:var(--pink-400);}
+  .onsitebox ul{margin:6px 0 0; padding-left:18px;}
+  .onsitebox li{margin-bottom:2px;}
   .card .actions{display:flex; flex-direction:column; gap:6px;}
   .card .detail{display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:13px; color:var(--stone-300); line-height:1.6;}
   .card .detail.open{display:block;}
@@ -81,6 +94,11 @@
   .tl-card .title{font-size:14px; font-weight:500;}
   .tl-card .venue{font-size:11.5px; color:var(--moss-300);}
   .conflictflag{color:var(--danger); font-size:12px; font-weight:600; margin-top:4px; display:block;}
+  .edittimebtn{display:block; background:none; border:none; color:var(--trail-300); font-size:11.5px; padding:0; margin-top:6px; cursor:pointer; font-family:inherit;}
+  .edittimebtn:hover{color:var(--trail-500);}
+  .timeedit{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);}
+  .timeedit input[type=time]{background:var(--ridge-950); border:1px solid var(--line); color:var(--stone-100); border-radius:3px; padding:5px 6px; font-size:13px;}
+  .timeedit span{color:var(--stone-300); font-size:12px;}
   .movetag{font-size:12px; color:var(--trail-300); margin:2px 0 0 0; padding:2px 0 2px 4px;}
   .venuebox{margin-top:16px;}
   .venuebox .vrow{display:flex; gap:6px; margin-bottom:6px;}
@@ -136,12 +154,17 @@
 
   <div class="datebar" id="datebar"></div>
 
+  <div class="viewtabs">
+    <button class="viewtabbtn active" id="vtab-plan">일정 짜기</button>
+    <button class="viewtabbtn" id="vtab-onsite">현장예매 목록</button>
+  </div>
+
   <div class="mobiletabs">
     <button class="mtabbtn active" id="mtab-list">전체 프로그램</button>
     <button class="mtabbtn" id="mtab-plan">내 타임라인 · 동선</button>
   </div>
 
-  <div class="layout">
+  <div class="layout" id="mainLayout">
     <section class="panel" id="panel-list">
       <h2>이 날 프로그램 <small id="dateLabel"></small></h2>
       <div class="row-inline" style="margin-bottom:10px;">
@@ -163,11 +186,12 @@
           </div>
           <textarea id="qa-title" placeholder="프로그램명" style="min-height:40px; margin-bottom:6px;"></textarea>
           <textarea id="qa-detail" placeholder="상세 설명 (선택, 시놉시스·등급 등)"></textarea>
+          <label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:13px; color:var(--stone-300);"><input type="checkbox" id="qa-onsite"> 현장예매 필요 (당일 매표소 구매)</label>
           <div style="margin-top:8px;"><button class="btn small" id="qa-submit">추가</button></div>
         </div>
 
         <div id="bulkAddForm" style="display:none;">
-          <p class="hint">한 줄에 하나씩, <code>시작-종료 | 장소 | 제목 | 상세설명</code> 형식으로. 종료 시간·장소·상세설명은 생략 가능해요.<br>예) <code>09:30-11:00 | UC | 로컬시네마: 숏폼 애니메이션 | 국내 단편 5편 상영</code></p>
+          <p class="hint">한 줄에 하나씩, <code>시작-종료 | 장소 | 제목 | 상세설명 | 현장예매</code> 형식으로. 종료 시간·장소·상세설명·현장예매는 생략 가능해요. 현장예매 칸에 아무 글자나 넣으면 "현장예매 필요"로 표시돼요.<br>예) <code>09:30-11:00 | UC | 로컬시네마: 숏폼 애니메이션 | 국내 단편 5편 상영 | O</code></p>
           <textarea id="bulk-text" placeholder="09:30-11:00 | UC | 프로그램명 | 상세설명&#10;13:00 | AC1 | 프로그램명"></textarea>
           <div style="margin-top:8px;"><button class="btn small" id="bulk-submit">일괄 추가</button></div>
         </div>
@@ -182,6 +206,7 @@
     <section class="panel mtab-hide" id="panel-plan">
       <h2>내 타임라인 <small id="planDateLabel"></small></h2>
       <div id="statusBanner"></div>
+      <div id="onsiteChecklist"></div>
       <div class="timeline" id="timeline"></div>
       <div class="row-inline" style="margin-top:12px;">
         <button class="btn" id="btnConfirm">일정 확정하고 저장</button>
@@ -229,6 +254,11 @@
       <pre id="exportBox" style="display:none; white-space:pre-wrap; background:var(--ridge-950); border:1px solid var(--line); border-radius:3px; padding:10px; font-size:12.5px; margin-top:10px;"></pre>
     </section>
   </div>
+
+  <section class="panel" id="panel-onsite" style="display:none;">
+    <h2>현장예매 목록 <small>담아둔 프로그램 중 현장예매 표시된 것만, 날짜별로</small></h2>
+    <div id="onsiteByDate"></div>
+  </section>
 </div>
 
 <script>
@@ -276,10 +306,12 @@ if(!window.storage){
   let catalog = [];          // shared: {id,date,start,end,venue,title,detail}
   let myPicks = {};          // personal: {date: [id,...]}
   let confirmed = {};        // personal: {date: true/false}
+  let myTimeOverrides = {};  // personal: {date: {id: {start,end}}} — for 상시 프로그램 등 내가 원하는 시간대로 재배치
   let venues = {};           // shared: code -> note
   let currentDate = DATES[0];
   let uid = 1;
   let openDetailId = null;
+  let editTimeId = null;
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -302,12 +334,15 @@ if(!window.storage){
     myPicks = p ? JSON.parse(p) : {};
     const cf = await safeGet('confirmed', false);
     confirmed = cf ? JSON.parse(cf) : {};
+    const to = await safeGet('timeoverrides', false);
+    myTimeOverrides = to ? JSON.parse(to) : {};
     uid = catalog.reduce((m,x)=>Math.max(m,x.id||0),0) + 1;
   }
   async function saveCatalog(){ await safeSet('catalog', JSON.stringify(catalog), true); }
   async function saveVenues(){ await safeSet('venues', JSON.stringify(venues), true); }
   async function saveMyPicks(){ await safeSet('mypicks', JSON.stringify(myPicks), false); }
   async function saveConfirmed(){ await safeSet('confirmed', JSON.stringify(confirmed), false); }
+  async function saveTimeOverrides(){ await safeSet('timeoverrides', JSON.stringify(myTimeOverrides), false); }
 
   function parseBulkLine(line){
     const parts = line.split('|').map(s=>s.trim());
@@ -320,7 +355,8 @@ if(!window.storage){
     const venue = (parts[1]||'').toUpperCase();
     const title = parts[2] || '(제목 없음)';
     const detail = parts[3] || '';
-    return {start, end, venue, title, detail};
+    const onsite = !!(parts[4] && parts[4].trim());
+    return {start, end, venue, title, detail, onsite};
   }
 
   const DEFAULT_BULK = {
@@ -565,7 +601,7 @@ if(!window.storage){
       const btn = document.createElement('button');
       btn.className = 'datebtn' + (d===currentDate?' active':'');
       btn.innerHTML = fmtDateShort(d) + '<span class="cnt">' + count + '개</span>';
-      btn.onclick = () => { currentDate = d; openDetailId=null; renderAll(); };
+      btn.onclick = () => { currentDate = d; openDetailId=null; editTimeId=null; renderAll(); };
       bar.appendChild(btn);
     });
   }
@@ -586,18 +622,30 @@ if(!window.storage){
           <div class="meta">
             <div class="title" data-id="${p.id}" data-act="detail">${esc(p.title)}</div>
             ${p.venue ? '<span class="venue">'+esc(p.venue)+'</span>' : ''}
+            <button class="onsitetag ${p.onsite?'on':''}" data-id="${p.id}" data-act="onsite" title="눌러서 현장예매 필요 여부 표시">${p.onsite?'현장예매 ✓':'현장예매?'}</button>
           </div>
           <div class="actions">
             <button class="btn small ${picked?'secondary':''}" data-id="${p.id}" data-act="toggle">${picked?'담김 ✓':'담기'}</button>
             <button class="removeicon" data-id="${p.id}" data-act="del" title="삭제" aria-label="삭제">✕</button>
           </div>
         </div>
-        <div class="detail ${openDetailId===p.id?'open':''}" data-detail="${p.id}">${esc(p.detail) || '상세 설명이 없어요.'}</div>`;
+        <div class="detail ${openDetailId===p.id?'open':''}" data-detail="${p.id}">
+          ${esc(p.detail) || '상세 설명이 없어요.'}
+          <div style="margin-top:8px;"><a class="btn small secondary" style="text-decoration:none; display:inline-block;" target="_blank" rel="noopener noreferrer" href="https://search.naver.com/search.naver?query=${encodeURIComponent(p.title + ' 영화')}">포스터·줄거리 검색</a></div>
+        </div>`;
       el.appendChild(card);
     });
     el.querySelectorAll('[data-act="toggle"]').forEach(b=>{ b.onclick = () => toggleInPlan(Number(b.dataset.id)); });
     el.querySelectorAll('[data-act="del"]').forEach(b=>{ b.onclick = () => deleteProgram(Number(b.dataset.id)); });
     el.querySelectorAll('[data-act="detail"]').forEach(t=>{ t.onclick = () => { openDetailId = (openDetailId===Number(t.dataset.id)) ? null : Number(t.dataset.id); renderProgList(); }; });
+    el.querySelectorAll('[data-act="onsite"]').forEach(b=>{ b.onclick = (ev) => { ev.stopPropagation(); toggleOnsite(Number(b.dataset.id)); }; });
+  }
+
+  function toggleOnsite(id){
+    const p = catalog.find(x=>x.id===id);
+    if(!p) return;
+    p.onsite = !p.onsite;
+    saveCatalog(); renderAll();
   }
 
   function toggleInPlan(id){
@@ -616,7 +664,10 @@ if(!window.storage){
 
   function getPlanItems(date){
     const ids = picksFor(date);
-    return catalog.filter(p=>p.date===date && ids.includes(p.id)).sort((a,b)=>toMin(a.start)-toMin(b.start));
+    const overrides = myTimeOverrides[date] || {};
+    return catalog.filter(p=>p.date===date && ids.includes(p.id))
+      .map(p => overrides[p.id] ? {...p, start: overrides[p.id].start, end: overrides[p.id].end, overridden: true} : p)
+      .sort((a,b)=>toMin(a.start)-toMin(b.start));
   }
   function withConflicts(items){
     const withRange = items.map(p=>{ const s=toMin(p.start); const e=p.end?toMin(p.end):s+90; return {...p, s, e, estimated: !p.end}; });
@@ -633,10 +684,17 @@ if(!window.storage){
     if(items.length===0){
       tl.innerHTML = '<div class="empty">이 날짜에 담은 프로그램이 없어요.<br>왼쪽에서 "담기"를 눌러보세요.</div>';
       banner.innerHTML = '';
+      $('onsiteChecklist').innerHTML = '';
       renderMap([]);
       updateShareUI(false);
       return;
     }
+    const onsiteItems = items.filter(p=>p.onsite);
+    $('onsiteChecklist').innerHTML = onsiteItems.length===0 ? '' : `
+      <div class="onsitebox">
+        <b>현장예매 체크리스트</b> — 당일 9시 매표소 오픈, 잊지 말고 미리 사두세요.
+        <ul>${onsiteItems.map(p=>`<li>${p.start} · ${esc(p.title)}${p.venue?' ('+esc(p.venue)+')':''}</li>`).join('')}</ul>
+      </div>`;
     const withRange = withConflicts(items);
     const conflictCount = withRange.filter(p=>p.conflict).length;
 
@@ -656,15 +714,42 @@ if(!window.storage){
         tl.appendChild(moveDiv);
       }
       lastVenue = p.venue || lastVenue;
+      const editing = editTimeId===p.id;
       const item = document.createElement('div'); item.className = 'tl-item' + (p.conflict?' conflict':'');
       item.innerHTML = `
         <div class="t">${p.start}</div><div class="dot"></div>
         <div class="tl-card">
           <div class="title">${esc(p.title)}</div>
-          <div class="venue">${p.venue ? esc(p.venue) + (venues[p.venue] ? ' · '+esc(venues[p.venue]) : '') : '장소 미정'} · ${p.start}${p.end ? '~'+p.end : (' (~'+toClock(p.e)+' 추정)')}</div>
+          <div class="venue">${p.venue ? esc(p.venue) + (venues[p.venue] ? ' · '+esc(venues[p.venue]) : '') : '장소 미정'} · ${p.start}${p.end ? '~'+p.end : (' (~'+toClock(p.e)+' 추정)')}${p.overridden?' · 내가 정한 시간':''}</div>
           ${p.conflict ? '<span class="conflictflag">다른 프로그램과 시간 겹침</span>' : ''}
+          <button class="edittimebtn" data-id="${p.id}" data-act="edittime">${editing?'시간 수정 취소':'⏱ 내 시간 직접 정하기'}</button>
+          ${editing ? `
+            <div class="timeedit">
+              <input type="time" class="te-start" value="${p.start}">
+              <span>~</span>
+              <input type="time" class="te-end" value="${p.end || toClock(p.e)}">
+              <button class="btn small" data-act="savetime" data-id="${p.id}">저장</button>
+              ${p.overridden ? `<button class="btn small secondary" data-act="resettime" data-id="${p.id}">원래 시간으로</button>` : ''}
+            </div>` : ''}
         </div>`;
       tl.appendChild(item);
+      item.querySelector('[data-act="edittime"]').onclick = () => { editTimeId = editing ? null : p.id; renderTimeline(); };
+      if(editing){
+        item.querySelector('[data-act="savetime"]').onclick = () => {
+          const ns = item.querySelector('.te-start').value, ne = item.querySelector('.te-end').value;
+          if(!ns){ alert('시작 시간을 입력해주세요.'); return; }
+          if(!myTimeOverrides[currentDate]) myTimeOverrides[currentDate] = {};
+          myTimeOverrides[currentDate][p.id] = {start: ns, end: ne || null};
+          editTimeId = null;
+          saveTimeOverrides(); markDirty(currentDate); renderAll();
+        };
+        const resetBtn = item.querySelector('[data-act="resettime"]');
+        if(resetBtn) resetBtn.onclick = () => {
+          if(myTimeOverrides[currentDate]) delete myTimeOverrides[currentDate][p.id];
+          editTimeId = null;
+          saveTimeOverrides(); markDirty(currentDate); renderAll();
+        };
+      }
     });
 
     renderMap(withRange);
@@ -734,7 +819,20 @@ if(!window.storage){
     box.querySelectorAll('[data-act="delvenue"]').forEach(b=>{ b.onclick = () => { delete venues[b.dataset.orig]; saveVenues(); renderAll(); }; });
   }
 
-  function renderAll(){ renderDateBar(); renderProgList(); renderTimeline(); renderVenueRows(); }
+  function renderAll(){ renderDateBar(); renderProgList(); renderTimeline(); renderVenueRows(); renderOnsiteByDate(); }
+
+  function renderOnsiteByDate(){
+    let html = '', total = 0;
+    DATES.forEach(d=>{
+      const items = getPlanItems(d).filter(p=>p.onsite);
+      if(items.length===0) return;
+      total += items.length;
+      html += `<div class="onsitedate"><h3>${fmtDate(d)}</h3><ul>${items.map(p=>`<li>${p.start}${p.end?'~'+p.end:''} · ${esc(p.title)}${p.venue?' ('+esc(p.venue)+')':''}</li>`).join('')}</ul></div>`;
+    });
+    $('onsiteByDate').innerHTML = total===0
+      ? '<div class="empty">현장예매로 표시해둔 담은 프로그램이 없어요.<br>프로그램 카드의 "현장예매?" 태그를 눌러 표시해보세요.</div>'
+      : html;
+  }
 
   $('btnRefresh').onclick = async () => { await loadAll(); renderAll(); };
 
@@ -742,11 +840,11 @@ if(!window.storage){
   $('btnBulkAdd').onclick = () => { $('bulkAddForm').style.display = $('bulkAddForm').style.display==='none'?'block':'none'; $('quickAddForm').style.display='none'; };
 
   $('qa-submit').onclick = async () => {
-    const start=$('qa-start').value, end=$('qa-end').value, venue=$('qa-venue').value.trim().toUpperCase(), title=$('qa-title').value.trim(), detail=$('qa-detail').value.trim();
+    const start=$('qa-start').value, end=$('qa-end').value, venue=$('qa-venue').value.trim().toUpperCase(), title=$('qa-title').value.trim(), detail=$('qa-detail').value.trim(), onsite=$('qa-onsite').checked;
     if(!start || !title){ alert('시작 시간과 프로그램명은 필수예요.'); return; }
-    catalog.push({id: uid++, date: currentDate, start, end: end||null, venue, title, detail});
+    catalog.push({id: uid++, date: currentDate, start, end: end||null, venue, title, detail, onsite});
     if(venue && !(venue in venues)) venues[venue] = '';
-    $('qa-start').value=''; $('qa-end').value=''; $('qa-venue').value=''; $('qa-title').value=''; $('qa-detail').value='';
+    $('qa-start').value=''; $('qa-end').value=''; $('qa-venue').value=''; $('qa-title').value=''; $('qa-detail').value=''; $('qa-onsite').checked=false;
     await saveCatalog(); await saveVenues(); renderAll();
   };
 
@@ -775,7 +873,7 @@ if(!window.storage){
   // ever becomes a real problem for power users.
   function buildShareUrl(){
     const items = getPlanItems(currentDate);
-    const payload = { date: currentDate, items: items.map(p=>({id:p.id, start:p.start, end:p.end||null, venue:p.venue||'', title:p.title})) };
+    const payload = { date: currentDate, items: items.map(p=>({id:p.id, start:p.start, end:p.end||null, venue:p.venue||'', title:p.title, onsite:p.onsite||false})) };
     const params = new URLSearchParams();
     params.set('plan', JSON.stringify(payload));
     return location.origin + location.pathname + '?' + params.toString();
@@ -789,7 +887,7 @@ if(!window.storage){
     if(current.length>0 && !sameSet && !confirm(fmtDate(payload.date) + ' 날짜에 이미 담아둔 내 일정이 있어요. 불러온 일정으로 덮어쓸까요?')) return;
     const ids = resolved.map(({it, existing})=>{
       if(existing) return existing.id;
-      const created = {id: uid++, date: payload.date, start: it.start, end: it.end||null, venue: it.venue||'', title: it.title, detail: ''};
+      const created = {id: uid++, date: payload.date, start: it.start, end: it.end||null, venue: it.venue||'', title: it.title, detail: '', onsite: it.onsite||false};
       catalog.push(created);
       return created.id;
     });
@@ -871,15 +969,25 @@ if(!window.storage){
     const box = $('exportBox');
     if(items.length===0){ box.style.display='block'; box.textContent='담은 프로그램이 없어요.'; return; }
     let txt = fmtDate(currentDate) + ' 내 상영 계획\n\n';
-    items.forEach(p=>{ txt += `${p.start}${p.end?'~'+p.end:''}  [${p.venue||'장소미정'}]  ${p.title}\n`; });
+    items.forEach(p=>{ txt += `${p.onsite?'★현장예매 ':''}${p.start}${p.end?'~'+p.end:''}  [${p.venue||'장소미정'}]  ${p.title}\n`; });
     box.style.display='block'; box.textContent = txt;
   };
 
   $('resetAll').onclick = async () => {
     if(!confirm('내 담긴 일정과 확정 상태를 모두 초기화할까요? (공유 프로그램 목록은 유지돼요)')) return;
-    myPicks = {}; confirmed = {};
-    await saveMyPicks(); await saveConfirmed();
+    myPicks = {}; confirmed = {}; myTimeOverrides = {};
+    await saveMyPicks(); await saveConfirmed(); await saveTimeOverrides();
     renderAll();
+  };
+
+  $('vtab-plan').onclick = () => {
+    $('vtab-plan').classList.add('active'); $('vtab-onsite').classList.remove('active');
+    $('mainLayout').style.display=''; $('panel-onsite').style.display='none';
+  };
+  $('vtab-onsite').onclick = () => {
+    $('vtab-onsite').classList.add('active'); $('vtab-plan').classList.remove('active');
+    $('mainLayout').style.display='none'; $('panel-onsite').style.display='block';
+    renderOnsiteByDate();
   };
 
   $('mtab-list').onclick = () => { $('mtab-list').classList.add('active'); $('mtab-plan').classList.remove('active'); $('panel-list').style.display='block'; $('panel-plan').style.display='none'; };
