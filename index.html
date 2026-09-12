@@ -336,7 +336,10 @@ if(!window.storage){
     const title = parts[2] || '(제목 없음)';
     const detail = parts[3] || '';
     const ticket = (parts[4] && parts[4].trim()) ? 'onsite' : null;
-    return {start, end, venue, title, detail, ticket};
+    // ponytail: 등급/공연/움프토크 태그가 없는 항목(체험·전시·워크숍류)은 공식 안내상
+    // 현장 예매석이 아예 배정되지 않으므로 '현장예매 필요' 상태를 고를 수 없게 표시한다.
+    const experience = !detail;
+    return {start, end, venue, title, detail, ticket, experience};
   }
 
   const DEFAULT_BULK = {
@@ -603,7 +606,7 @@ if(!window.storage){
           <div class="meta">
             <div class="title" data-id="${p.id}" data-act="detail">${esc(p.title)}</div>
             ${p.venue ? '<span class="venue">'+esc(p.venue)+'</span>' : ''}
-            <button class="onsitetag ${ti.cls}" data-id="${p.id}" data-act="onsite" title="눌러서 예매 상태 변경 (미정 → 현장예매 필요 → 현장예매 불필요 → 매진)">${ti.text}</button>
+            <button class="onsitetag ${ti.cls}" data-id="${p.id}" data-act="onsite" title="${p.experience ? '눌러서 예매 상태 변경 (미정 → 현장예매 불필요 → 매진) · 체험형 프로그램은 현장예매석이 없어요' : '눌러서 예매 상태 변경 (미정 → 현장예매 필요 → 현장예매 불필요 → 매진)'}">${ti.text}</button>
           </div>
           <div class="actions">
             <button class="btn small ${picked?'secondary':''}" data-id="${p.id}" data-act="toggle">${picked?'담김 ✓':'담기'}</button>
@@ -623,6 +626,7 @@ if(!window.storage){
   }
 
   const TICKET_STATES = [null, 'onsite', 'free', 'soldout'];
+  function ticketStatesFor(p){ return p.experience ? TICKET_STATES.filter(t=>t!=='onsite') : TICKET_STATES; }
   function ticketOf(p){ return p.ticket !== undefined ? p.ticket : (p.onsite ? 'onsite' : null); }
   function isOnsite(p){ return ticketOf(p) === 'onsite'; }
   function ticketInfo(p){
@@ -636,8 +640,9 @@ if(!window.storage){
   function cycleTicket(id){
     const p = catalog.find(x=>x.id===id);
     if(!p) return;
-    const idx = TICKET_STATES.indexOf(ticketOf(p));
-    p.ticket = TICKET_STATES[(idx+1) % TICKET_STATES.length];
+    const states = ticketStatesFor(p);
+    const idx = states.indexOf(ticketOf(p));
+    p.ticket = states[(idx+1) % states.length];
     delete p.onsite;
     saveCatalog(); renderAll();
   }
@@ -830,7 +835,7 @@ if(!window.storage){
   $('qa-submit').onclick = async () => {
     const start=$('qa-start').value, venue=$('qa-venue').value.trim().toUpperCase(), title=$('qa-title').value.trim();
     if(!start || !title){ alert('시작 시간과 프로그램명은 필수예요.'); return; }
-    catalog.push({id: uid++, date: currentDate, start, end: null, venue, title, detail:'', ticket: null});
+    catalog.push({id: uid++, date: currentDate, start, end: null, venue, title, detail:'', ticket: null, experience:false});
     if(venue && !(venue in venues)) venues[venue] = '';
     $('qa-start').value=''; $('qa-venue').value=''; $('qa-title').value='';
     await saveCatalog(); await saveVenues(); renderAll();
