@@ -44,27 +44,26 @@
   .panel h2 small{font-family:'Plus Jakarta Sans'; font-size:12px; font-weight:400; color:var(--stone-300);}
   .mobiletabs{display:none; gap:6px; margin-bottom:12px;}
   @media (max-width:860px){ .mobiletabs{display:flex;} .mtab-hide{display:none;} }
-  .viewtabs{display:flex; gap:6px; margin-bottom:14px;}
-  .viewtabbtn{flex:0 0 auto; padding:9px 16px; border-radius:3px; border:1px solid var(--line); background:transparent; color:var(--stone-300); font-family:'Archivo Narrow'; font-size:15px; font-weight:600; cursor:pointer;}
-  .viewtabbtn.active{background:var(--pink-400); color:var(--ridge-950); border-color:var(--pink-400);}
-  .onsitedate{margin-bottom:18px;}
-  .onsitedate h3{font-family:'Archivo Narrow'; font-size:16px; font-weight:600; color:var(--pink-400); margin:0 0 8px;}
+  .onsitebar{margin:0 0 14px; border:1px solid var(--pink-400); background:rgba(232,160,196,0.08); border-radius:4px;}
+  .onsitebar-toggle{display:block; width:100%; text-align:left; background:none; border:none; color:var(--pink-400); font-family:'Archivo Narrow'; font-weight:600; font-size:14.5px; padding:10px 12px; cursor:pointer;}
+  .onsitebar-body{padding:0 12px 10px;}
+  .onsitedate{margin-bottom:14px;}
+  .onsitedate:last-child{margin-bottom:0;}
+  .onsitedate h3{font-family:'Archivo Narrow'; font-size:14px; font-weight:600; color:var(--pink-400); margin:0 0 6px;}
   .onsitedate ul{margin:0; padding-left:20px;}
   .onsitedate li{margin-bottom:5px; font-size:13.5px;}
   .mtabbtn{flex:1; padding:9px; border-radius:3px; border:1px solid var(--line); background:transparent; color:var(--stone-300); font-family:'Archivo Narrow'; font-size:15px; font-weight:600; cursor:pointer;}
   .mtabbtn.active{background:var(--moss-500); color:var(--ridge-950); border-color:var(--moss-500);}
   .addbox{border:1px dashed var(--line); border-radius:3px; padding:12px; margin-bottom:14px;}
-  .addbox textarea, .addbox input[type=text]{width:100%; background:var(--ridge-950); color:var(--stone-100); border:1px solid var(--line); border-radius:3px; padding:9px 10px; font-family:'Plus Jakarta Sans'; font-size:13.5px;}
-  .addbox textarea{min-height:64px; resize:vertical;}
+  .addbox input[type=text]{width:100%; background:var(--ridge-950); color:var(--stone-100); border:1px solid var(--line); border-radius:3px; padding:9px 10px; font-family:'Plus Jakarta Sans'; font-size:13.5px; margin-top:8px;}
   .addbox .hint{color:var(--stone-300); font-size:12px; margin:6px 0 10px; line-height:1.5;}
-  .addbox .hint code{color:var(--trail-300); background:rgba(63,198,232,0.1); padding:1px 4px; border-radius:2px;}
   .row-inline{display:flex; gap:8px; flex-wrap:wrap;}
   .btn{border:none; border-radius:3px; padding:9px 14px; font-family:'Archivo Narrow'; font-weight:600; font-size:15px; cursor:pointer; background:var(--moss-500); color:var(--ridge-950);}
   .btn.secondary{background:transparent; border:1px solid var(--line); color:var(--stone-100);}
   .btn.small{padding:5px 10px; font-size:13px;}
   .btn.danger{background:var(--danger); color:var(--stone-100);}
   .btn:disabled{opacity:0.4; cursor:not-allowed;}
-  .proglist{display:flex; flex-direction:column; gap:8px; max-height:620px; overflow-y:auto; padding-right:2px;}
+  .proglist{display:flex; flex-direction:column; gap:8px;}
   .card{border:1px solid var(--line); border-radius:3px; padding:10px 12px; background:var(--ridge-800);}
   .cardtop{display:flex; gap:10px; align-items:flex-start;}
   .card .time{font-family:'Archivo Narrow'; font-weight:600; font-size:17px; color:var(--trail-300); min-width:78px;}
@@ -72,8 +71,10 @@
   .card .meta{flex:1; min-width:0;}
   .card .title{font-size:14.5px; font-weight:500; word-break:keep-all; cursor:pointer; text-decoration:underline dotted var(--stone-300); text-underline-offset:3px;}
   .card .venue{display:inline-block; margin-top:5px; font-size:11.5px; color:var(--moss-300); border:1px solid var(--moss-500); padding:1px 7px; border-radius:20px;}
-  .onsitetag{display:inline-block; margin-top:5px; margin-left:5px; font-size:11.5px; color:var(--pink-400); border:1px solid var(--pink-400); background:transparent; padding:1px 7px; border-radius:20px; cursor:pointer; font-family:inherit;}
-  .onsitetag.on{background:rgba(232,160,196,0.18);}
+  .onsitetag{display:inline-flex; align-items:center; min-height:24px; margin-top:5px; margin-left:5px; font-size:11.5px; color:var(--pink-400); border:1px solid var(--pink-400); background:transparent; padding:1px 7px; border-radius:20px; cursor:pointer; font-family:inherit;}
+  .onsitetag.onsite{background:rgba(232,160,196,0.18);}
+  .onsitetag.free{color:var(--moss-300); border-color:var(--moss-500);}
+  .onsitetag.soldout{color:var(--danger); border-color:var(--danger); text-decoration:line-through;}
   .onsitebox{border:1px solid var(--pink-400); background:rgba(232,160,196,0.08); border-radius:3px; padding:9px 12px; margin-bottom:10px; font-size:13px;}
   .onsitebox b{color:var(--pink-400);}
   .onsitebox ul{margin:6px 0 0; padding-left:18px;}
@@ -82,13 +83,13 @@
   .card .detail{display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:13px; color:var(--stone-300); line-height:1.6;}
   .card .detail.open{display:block;}
   .empty{color:var(--stone-300); font-size:13.5px; text-align:center; padding:30px 10px; border:1px dashed var(--line); border-radius:4px;}
-  .timeline{position:relative; padding-left:56px;}
+  .timeline{position:relative; padding-left:80px;}
   .tl-item{position:relative; padding:10px 0 22px;}
-  .tl-item .dot{position:absolute; left:-42px; top:12px; width:10px; height:10px; border-radius:50%; background:var(--moss-500); border:2px solid var(--ridge-950); box-shadow:0 0 0 1px var(--moss-500);}
+  .tl-item .dot{position:absolute; left:-21px; top:12px; width:10px; height:10px; border-radius:50%; background:var(--moss-500); border:2px solid var(--ridge-950); box-shadow:0 0 0 1px var(--moss-500);}
   .tl-item.conflict .dot{background:var(--danger); box-shadow:0 0 0 1px var(--danger);}
-  .tl-item::before{content:''; position:absolute; left:-38px; top:0; bottom:0; width:1px; background:var(--line);}
+  .tl-item::before{content:''; position:absolute; left:-16px; top:0; bottom:0; width:1px; background:var(--line);}
   .tl-item:first-child::before{top:12px;}
-  .tl-item .t{position:absolute; left:-56px; top:8px; font-family:'Archivo Narrow'; font-weight:600; font-size:13px; color:var(--stone-300); width:44px; text-align:right;}
+  .tl-item .t{position:absolute; left:-80px; top:8px; font-family:'Archivo Narrow'; font-weight:600; font-size:13px; color:var(--stone-300); width:48px; text-align:right;}
   .tl-card{border:1px solid var(--line); border-radius:3px; padding:9px 11px; background:var(--ridge-800);}
   .tl-item.conflict .tl-card{border-color:var(--danger); background:rgba(194,84,84,0.08);}
   .tl-card .title{font-size:14px; font-weight:500;}
@@ -103,7 +104,7 @@
   .venuebox{margin-top:16px;}
   .venuebox .vrow{display:flex; gap:6px; margin-bottom:6px;}
   .venuebox input{background:var(--ridge-950); border:1px solid var(--line); color:var(--stone-100); border-radius:3px; padding:6px 8px; font-size:13px;}
-  .venuebox input.code{width:64px; flex:0 0 auto; color:var(--moss-300); font-weight:600;}
+  .venuebox .vcode{width:64px; flex:0 0 auto; color:var(--moss-300); font-weight:600; font-family:'Archivo Narrow'; display:flex; align-items:center;}
   .venuebox input.name{flex:1;}
   .toolbar{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;}
   .stat{font-size:12.5px; color:var(--stone-300);}
@@ -152,12 +153,9 @@
     <p class="sub">날짜를 고르면 그날 프로그램이 뜨고, 제목을 누르면 상세 내용을 볼 수 있어요. 담은 프로그램은 겹쳐도 일단 타임라인에 올라가고, 확정할 때 겹치는 부분을 빨갛게 표시해서 정리해드려요.</p>
   </header>
 
-  <div class="datebar" id="datebar"></div>
+  <div class="onsitebar" id="onsiteBar" style="display:none;"></div>
 
-  <div class="viewtabs">
-    <button class="viewtabbtn active" id="vtab-plan">일정 짜기</button>
-    <button class="viewtabbtn" id="vtab-onsite">현장예매 목록</button>
-  </div>
+  <div class="datebar" id="datebar"></div>
 
   <div class="mobiletabs">
     <button class="mtabbtn active" id="mtab-list">전체 프로그램</button>
@@ -172,28 +170,16 @@
       </div>
 
       <div class="addbox">
-        <div class="row-inline" style="margin-bottom:8px;">
-          <button class="btn small secondary" id="btnQuickAdd">+ 한 개씩 입력</button>
-          <button class="btn small secondary" id="btnBulkAdd">+ 여러 줄 붙여넣기</button>
-        </div>
+        <button class="btn small secondary" id="btnQuickAdd">+ 프로그램 추가</button>
         <p class="hint">이 목록은 이 앱을 쓰는 모두와 함께 공유돼요. 한 번만 입력해두면 같이 보는 사람도 볼 수 있어요.</p>
 
-        <div id="quickAddForm" style="display:none; margin-bottom:10px;">
+        <div id="quickAddForm" style="display:none;">
           <div class="row-inline" style="margin-bottom:6px;">
             <input id="qa-start" type="time" style="background:var(--ridge-950);border:1px solid var(--line);color:var(--stone-100);border-radius:3px;padding:6px 8px;">
-            <input id="qa-end" type="time" style="background:var(--ridge-950);border:1px solid var(--line);color:var(--stone-100);border-radius:3px;padding:6px 8px;" title="종료 시간(선택)">
             <input id="qa-venue" placeholder="장소코드 (예: UC)" style="background:var(--ridge-950);border:1px solid var(--line);color:var(--stone-100);border-radius:3px;padding:6px 8px;width:110px;">
           </div>
-          <textarea id="qa-title" placeholder="프로그램명" style="min-height:40px; margin-bottom:6px;"></textarea>
-          <textarea id="qa-detail" placeholder="상세 설명 (선택, 시놉시스·등급 등)"></textarea>
-          <label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:13px; color:var(--stone-300);"><input type="checkbox" id="qa-onsite"> 현장예매 필요 (당일 매표소 구매)</label>
+          <input id="qa-title" type="text" placeholder="프로그램명">
           <div style="margin-top:8px;"><button class="btn small" id="qa-submit">추가</button></div>
-        </div>
-
-        <div id="bulkAddForm" style="display:none;">
-          <p class="hint">한 줄에 하나씩, <code>시작-종료 | 장소 | 제목 | 상세설명 | 현장예매</code> 형식으로. 종료 시간·장소·상세설명·현장예매는 생략 가능해요. 현장예매 칸에 아무 글자나 넣으면 "현장예매 필요"로 표시돼요.<br>예) <code>09:30-11:00 | UC | 로컬시네마: 숏폼 애니메이션 | 국내 단편 5편 상영 | O</code></p>
-          <textarea id="bulk-text" placeholder="09:30-11:00 | UC | 프로그램명 | 상세설명&#10;13:00 | AC1 | 프로그램명"></textarea>
-          <div style="margin-top:8px;"><button class="btn small" id="bulk-submit">일괄 추가</button></div>
         </div>
       </div>
 
@@ -220,7 +206,6 @@
       <div class="venuebox">
         <h2 style="font-size:16px; margin-top:18px;">장소 안내 (동선 메모) <small>모두와 공유됨</small></h2>
         <div id="venueRows"></div>
-        <button class="btn small secondary" id="addVenueRow" style="margin-top:4px;">+ 장소 추가</button>
       </div>
 
       <div class="sharebox">
@@ -254,11 +239,6 @@
       <pre id="exportBox" style="display:none; white-space:pre-wrap; background:var(--ridge-950); border:1px solid var(--line); border-radius:3px; padding:10px; font-size:12.5px; margin-top:10px;"></pre>
     </section>
   </div>
-
-  <section class="panel" id="panel-onsite" style="display:none;">
-    <h2>현장예매 목록 <small>담아둔 프로그램 중 현장예매 표시된 것만, 날짜별로</small></h2>
-    <div id="onsiteByDate"></div>
-  </section>
 </div>
 
 <script>
@@ -355,8 +335,8 @@ if(!window.storage){
     const venue = (parts[1]||'').toUpperCase();
     const title = parts[2] || '(제목 없음)';
     const detail = parts[3] || '';
-    const onsite = !!(parts[4] && parts[4].trim());
-    return {start, end, venue, title, detail, onsite};
+    const ticket = (parts[4] && parts[4].trim()) ? 'onsite' : null;
+    return {start, end, venue, title, detail, ticket};
   }
 
   const DEFAULT_BULK = {
@@ -615,6 +595,7 @@ if(!window.storage){
     if(list.length===0){ el.innerHTML = '<div class="empty">아직 등록된 프로그램이 없어요.<br>위에서 프로그램을 추가해보세요.</div>'; return; }
     list.forEach(p=>{
       const picked = isPicked(currentDate, p.id);
+      const ti = ticketInfo(p);
       const card = document.createElement('div'); card.className = 'card';
       card.innerHTML = `
         <div class="cardtop">
@@ -622,7 +603,7 @@ if(!window.storage){
           <div class="meta">
             <div class="title" data-id="${p.id}" data-act="detail">${esc(p.title)}</div>
             ${p.venue ? '<span class="venue">'+esc(p.venue)+'</span>' : ''}
-            <button class="onsitetag ${p.onsite?'on':''}" data-id="${p.id}" data-act="onsite" title="눌러서 현장예매 필요 여부 표시">${p.onsite?'현장예매 ✓':'현장예매?'}</button>
+            <button class="onsitetag ${ti.cls}" data-id="${p.id}" data-act="onsite" title="눌러서 예매 상태 변경 (미정 → 현장예매 필요 → 현장예매 불필요 → 매진)">${ti.text}</button>
           </div>
           <div class="actions">
             <button class="btn small ${picked?'secondary':''}" data-id="${p.id}" data-act="toggle">${picked?'담김 ✓':'담기'}</button>
@@ -631,20 +612,33 @@ if(!window.storage){
         </div>
         <div class="detail ${openDetailId===p.id?'open':''}" data-detail="${p.id}">
           ${esc(p.detail) || '상세 설명이 없어요.'}
-          <div style="margin-top:8px;"><a class="btn small secondary" style="text-decoration:none; display:inline-block;" target="_blank" rel="noopener noreferrer" href="https://search.naver.com/search.naver?query=${encodeURIComponent(p.title + ' 영화')}">포스터·줄거리 검색</a></div>
+          <div style="margin-top:8px;"><a class="btn small secondary" style="text-decoration:none; display:inline-block;" target="_blank" rel="noopener noreferrer" href="https://www.umff.kr/kor/">UMFF 공식 사이트에서 찾아보기</a></div>
         </div>`;
       el.appendChild(card);
     });
     el.querySelectorAll('[data-act="toggle"]').forEach(b=>{ b.onclick = () => toggleInPlan(Number(b.dataset.id)); });
     el.querySelectorAll('[data-act="del"]').forEach(b=>{ b.onclick = () => deleteProgram(Number(b.dataset.id)); });
     el.querySelectorAll('[data-act="detail"]').forEach(t=>{ t.onclick = () => { openDetailId = (openDetailId===Number(t.dataset.id)) ? null : Number(t.dataset.id); renderProgList(); }; });
-    el.querySelectorAll('[data-act="onsite"]').forEach(b=>{ b.onclick = (ev) => { ev.stopPropagation(); toggleOnsite(Number(b.dataset.id)); }; });
+    el.querySelectorAll('[data-act="onsite"]').forEach(b=>{ b.onclick = (ev) => { ev.stopPropagation(); cycleTicket(Number(b.dataset.id)); }; });
   }
 
-  function toggleOnsite(id){
+  const TICKET_STATES = [null, 'onsite', 'free', 'soldout'];
+  function ticketOf(p){ return p.ticket !== undefined ? p.ticket : (p.onsite ? 'onsite' : null); }
+  function isOnsite(p){ return ticketOf(p) === 'onsite'; }
+  function ticketInfo(p){
+    switch(ticketOf(p)){
+      case 'onsite': return {cls:'onsite', text:'현장예매 필요'};
+      case 'free': return {cls:'free', text:'현장예매 불필요'};
+      case 'soldout': return {cls:'soldout', text:'매진'};
+      default: return {cls:'', text:'예매 상태?'};
+    }
+  }
+  function cycleTicket(id){
     const p = catalog.find(x=>x.id===id);
     if(!p) return;
-    p.onsite = !p.onsite;
+    const idx = TICKET_STATES.indexOf(ticketOf(p));
+    p.ticket = TICKET_STATES[(idx+1) % TICKET_STATES.length];
+    delete p.onsite;
     saveCatalog(); renderAll();
   }
 
@@ -689,7 +683,7 @@ if(!window.storage){
       updateShareUI(false);
       return;
     }
-    const onsiteItems = items.filter(p=>p.onsite);
+    const onsiteItems = items.filter(isOnsite);
     $('onsiteChecklist').innerHTML = onsiteItems.length===0 ? '' : `
       <div class="onsitebox">
         <b>현장예매 체크리스트</b> — 당일 9시 매표소 오픈, 잊지 말고 미리 사두세요.
@@ -798,74 +792,48 @@ if(!window.storage){
 
   function renderVenueRows(){
     const box = $('venueRows'); box.innerHTML = '';
-    Object.keys(venues).forEach(code=>{
+    const used = [...new Set(getPlanItems(currentDate).map(p=>p.venue).filter(Boolean))];
+    if(used.length===0){ box.innerHTML = '<div class="empty" style="padding:14px;">담은 프로그램의 장소가 없어요.</div>'; return; }
+    used.forEach(code=>{
+      if(!(code in venues)) venues[code] = '';
       const row = document.createElement('div'); row.className = 'vrow';
       row.innerHTML = `
-        <input class="code" value="${esc(code)}" data-orig="${esc(code)}" data-field="code">
-        <input class="name" placeholder="위치 설명" value="${esc(venues[code])}" data-orig="${esc(code)}" data-field="name">
-        <button class="removeicon" data-orig="${esc(code)}" data-act="delvenue" title="삭제" aria-label="삭제">✕</button>`;
+        <span class="vcode">${esc(code)}</span>
+        <input class="name" placeholder="위치 설명" value="${esc(venues[code])}" data-code="${esc(code)}">`;
       box.appendChild(row);
     });
-    box.querySelectorAll('input[data-field="name"]').forEach(inp=>{ inp.onchange = () => { venues[inp.dataset.orig]=inp.value; saveVenues(); renderTimeline(); }; });
-    box.querySelectorAll('input[data-field="code"]').forEach(inp=>{
-      inp.onchange = () => {
-        const orig = inp.dataset.orig, val = inp.value.trim();
-        if(!val || val===orig) return;
-        const note = venues[orig]; delete venues[orig]; venues[val]=note;
-        catalog.forEach(p=>{ if(p.venue===orig) p.venue=val; });
-        saveVenues(); saveCatalog(); renderAll();
-      };
-    });
-    box.querySelectorAll('[data-act="delvenue"]').forEach(b=>{ b.onclick = () => { delete venues[b.dataset.orig]; saveVenues(); renderAll(); }; });
+    box.querySelectorAll('input[data-code]').forEach(inp=>{ inp.onchange = () => { venues[inp.dataset.code]=inp.value; saveVenues(); renderTimeline(); }; });
   }
 
-  function renderAll(){ renderDateBar(); renderProgList(); renderTimeline(); renderVenueRows(); renderOnsiteByDate(); }
+  function renderAll(){ renderDateBar(); renderProgList(); renderTimeline(); renderVenueRows(); renderOnsiteBar(); }
 
-  function renderOnsiteByDate(){
+  let onsiteBarOpen = false;
+  function renderOnsiteBar(){
     let html = '', total = 0;
     DATES.forEach(d=>{
-      const items = getPlanItems(d).filter(p=>p.onsite);
+      const items = getPlanItems(d).filter(isOnsite);
       if(items.length===0) return;
       total += items.length;
       html += `<div class="onsitedate"><h3>${fmtDate(d)}</h3><ul>${items.map(p=>`<li>${p.start}${p.end?'~'+p.end:''} · ${esc(p.title)}${p.venue?' ('+esc(p.venue)+')':''}</li>`).join('')}</ul></div>`;
     });
-    $('onsiteByDate').innerHTML = total===0
-      ? '<div class="empty">현장예매로 표시해둔 담은 프로그램이 없어요.<br>프로그램 카드의 "현장예매?" 태그를 눌러 표시해보세요.</div>'
-      : html;
+    const bar = $('onsiteBar');
+    if(total===0){ bar.style.display='none'; bar.innerHTML=''; return; }
+    bar.style.display='block';
+    bar.innerHTML = `<button class="onsitebar-toggle" id="onsiteBarToggle">🎟 현장예매 필요 ${total}건 ${onsiteBarOpen?'▲':'▼'}</button><div class="onsitebar-body" style="display:${onsiteBarOpen?'block':'none'};">${html}</div>`;
+    $('onsiteBarToggle').onclick = () => { onsiteBarOpen = !onsiteBarOpen; renderOnsiteBar(); };
   }
 
   $('btnRefresh').onclick = async () => { await loadAll(); renderAll(); };
 
-  $('btnQuickAdd').onclick = () => { $('quickAddForm').style.display = $('quickAddForm').style.display==='none'?'block':'none'; $('bulkAddForm').style.display='none'; };
-  $('btnBulkAdd').onclick = () => { $('bulkAddForm').style.display = $('bulkAddForm').style.display==='none'?'block':'none'; $('quickAddForm').style.display='none'; };
+  $('btnQuickAdd').onclick = () => { $('quickAddForm').style.display = $('quickAddForm').style.display==='none'?'block':'none'; };
 
   $('qa-submit').onclick = async () => {
-    const start=$('qa-start').value, end=$('qa-end').value, venue=$('qa-venue').value.trim().toUpperCase(), title=$('qa-title').value.trim(), detail=$('qa-detail').value.trim(), onsite=$('qa-onsite').checked;
+    const start=$('qa-start').value, venue=$('qa-venue').value.trim().toUpperCase(), title=$('qa-title').value.trim();
     if(!start || !title){ alert('시작 시간과 프로그램명은 필수예요.'); return; }
-    catalog.push({id: uid++, date: currentDate, start, end: end||null, venue, title, detail, onsite});
+    catalog.push({id: uid++, date: currentDate, start, end: null, venue, title, detail:'', ticket: null});
     if(venue && !(venue in venues)) venues[venue] = '';
-    $('qa-start').value=''; $('qa-end').value=''; $('qa-venue').value=''; $('qa-title').value=''; $('qa-detail').value=''; $('qa-onsite').checked=false;
+    $('qa-start').value=''; $('qa-venue').value=''; $('qa-title').value='';
     await saveCatalog(); await saveVenues(); renderAll();
-  };
-
-  $('bulk-submit').onclick = async () => {
-    const lines = $('bulk-text').value.split('\n').map(l=>l.trim()).filter(Boolean);
-    let added = 0;
-    lines.forEach(line=>{
-      const parsed = parseBulkLine(line);
-      if(!parsed) return;
-      catalog.push({id: uid++, date: currentDate, ...parsed});
-      if(parsed.venue && !(parsed.venue in venues)) venues[parsed.venue] = '';
-      added++;
-    });
-    $('bulk-text').value='';
-    if(added>0){ await saveCatalog(); await saveVenues(); renderAll(); }
-    else alert('시간 형식을 인식하지 못했어요. "09:30-11:00 | UC | 제목" 형식을 확인해주세요.');
-  };
-
-  $('addVenueRow').onclick = () => {
-    let n=1, code='NEW'+n; while(code in venues){ n++; code='NEW'+n; }
-    venues[code]=''; saveVenues(); renderVenueRows();
   };
 
   // ponytail: share payload drops `detail` (synopsis) and isn't compressed, to keep the URL
@@ -873,7 +841,7 @@ if(!window.storage){
   // ever becomes a real problem for power users.
   function buildShareUrl(){
     const items = getPlanItems(currentDate);
-    const payload = { date: currentDate, items: items.map(p=>({id:p.id, start:p.start, end:p.end||null, venue:p.venue||'', title:p.title, onsite:p.onsite||false})) };
+    const payload = { date: currentDate, items: items.map(p=>({id:p.id, start:p.start, end:p.end||null, venue:p.venue||'', title:p.title, onsite:isOnsite(p)})) };
     const params = new URLSearchParams();
     params.set('plan', JSON.stringify(payload));
     return location.origin + location.pathname + '?' + params.toString();
@@ -887,7 +855,7 @@ if(!window.storage){
     if(current.length>0 && !sameSet && !confirm(fmtDate(payload.date) + ' 날짜에 이미 담아둔 내 일정이 있어요. 불러온 일정으로 덮어쓸까요?')) return;
     const ids = resolved.map(({it, existing})=>{
       if(existing) return existing.id;
-      const created = {id: uid++, date: payload.date, start: it.start, end: it.end||null, venue: it.venue||'', title: it.title, detail: '', onsite: it.onsite||false};
+      const created = {id: uid++, date: payload.date, start: it.start, end: it.end||null, venue: it.venue||'', title: it.title, detail: '', ticket: it.onsite ? 'onsite' : null};
       catalog.push(created);
       return created.id;
     });
@@ -969,7 +937,7 @@ if(!window.storage){
     const box = $('exportBox');
     if(items.length===0){ box.style.display='block'; box.textContent='담은 프로그램이 없어요.'; return; }
     let txt = fmtDate(currentDate) + ' 내 상영 계획\n\n';
-    items.forEach(p=>{ txt += `${p.onsite?'★현장예매 ':''}${p.start}${p.end?'~'+p.end:''}  [${p.venue||'장소미정'}]  ${p.title}\n`; });
+    items.forEach(p=>{ txt += `${isOnsite(p)?'★현장예매 ':''}${p.start}${p.end?'~'+p.end:''}  [${p.venue||'장소미정'}]  ${p.title}\n`; });
     box.style.display='block'; box.textContent = txt;
   };
 
@@ -978,16 +946,6 @@ if(!window.storage){
     myPicks = {}; confirmed = {}; myTimeOverrides = {};
     await saveMyPicks(); await saveConfirmed(); await saveTimeOverrides();
     renderAll();
-  };
-
-  $('vtab-plan').onclick = () => {
-    $('vtab-plan').classList.add('active'); $('vtab-onsite').classList.remove('active');
-    $('mainLayout').style.display=''; $('panel-onsite').style.display='none';
-  };
-  $('vtab-onsite').onclick = () => {
-    $('vtab-onsite').classList.add('active'); $('vtab-plan').classList.remove('active');
-    $('mainLayout').style.display='none'; $('panel-onsite').style.display='block';
-    renderOnsiteByDate();
   };
 
   $('mtab-list').onclick = () => { $('mtab-list').classList.add('active'); $('mtab-plan').classList.remove('active'); $('panel-list').style.display='block'; $('panel-plan').style.display='none'; };
