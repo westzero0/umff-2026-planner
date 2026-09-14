@@ -605,8 +605,8 @@ if(!window.storage){
           <div class="time">${p.start}${p.end ? '<small>~ '+p.end+'</small>' : ''}</div>
           <div class="meta">
             <div class="title" data-id="${p.id}" data-act="detail">${esc(p.title)}</div>
-            ${p.venue ? '<span class="venue">'+esc(p.venue)+'</span>' : ''}
-            ${p.experience ? '' : `<button class="onsitetag ${ti.cls}" data-id="${p.id}" data-act="onsite" title="눌러서 예매 상태 변경 (미정 → 현장예매 필요 → 현장예매 불필요 → 매진)">${ti.text}</button>`}
+            ${p.venue ? '<span class="venue" title="'+esc(p.venue)+'">'+esc(venueShortName(p.venue))+'</span>' : ''}
+            ${p.experience ? '' : `<select class="onsitetag ${ti.cls}" data-id="${p.id}" data-act="onsite">${TICKET_STATES.map(t=>`<option value="${t||''}" ${ticketOf(p)===t?'selected':''}>${ticketLabel(t)}</option>`).join('')}</select>`}
           </div>
           <div class="actions">
             <button class="btn small ${picked?'secondary':''}" data-id="${p.id}" data-act="toggle">${picked?'담김 ✓':'담기'}</button>
@@ -622,25 +622,30 @@ if(!window.storage){
     el.querySelectorAll('[data-act="toggle"]').forEach(b=>{ b.onclick = () => toggleInPlan(Number(b.dataset.id)); });
     el.querySelectorAll('[data-act="del"]').forEach(b=>{ b.onclick = () => deleteProgram(Number(b.dataset.id)); });
     el.querySelectorAll('[data-act="detail"]').forEach(t=>{ t.onclick = () => { openDetailId = (openDetailId===Number(t.dataset.id)) ? null : Number(t.dataset.id); renderProgList(); }; });
-    el.querySelectorAll('[data-act="onsite"]').forEach(b=>{ b.onclick = (ev) => { ev.stopPropagation(); cycleTicket(Number(b.dataset.id)); }; });
+    el.querySelectorAll('[data-act="onsite"]').forEach(s=>{ s.onclick = (ev) => ev.stopPropagation(); s.onchange = () => setTicket(Number(s.dataset.id), s.value || null); });
+  }
+  function venueShortName(code){
+    const note = venues[code];
+    if(!note) return code;
+    return note.split('·')[0].trim() || code;
   }
 
   const TICKET_STATES = [null, 'onsite', 'free', 'soldout'];
-  function ticketOf(p){ return p.ticket !== undefined ? p.ticket : (p.onsite ? 'onsite' : null); }
-  function isOnsite(p){ return ticketOf(p) === 'onsite'; }
-  function ticketInfo(p){
-    switch(ticketOf(p)){
-      case 'onsite': return {cls:'onsite', text:'현장예매 필요'};
-      case 'free': return {cls:'free', text:'현장예매 불필요'};
-      case 'soldout': return {cls:'soldout', text:'매진'};
-      default: return {cls:'', text:'예매 상태?'};
+  function ticketLabel(t){
+    switch(t){
+      case 'onsite': return '현장예매 필요';
+      case 'free': return '현장예매 불필요';
+      case 'soldout': return '매진';
+      default: return '예매 상태?';
     }
   }
-  function cycleTicket(id){
+  function ticketOf(p){ return p.ticket !== undefined ? p.ticket : (p.onsite ? 'onsite' : null); }
+  function isOnsite(p){ return ticketOf(p) === 'onsite'; }
+  function ticketInfo(p){ const t = ticketOf(p); return {cls: t||'', text: ticketLabel(t)}; }
+  function setTicket(id, value){
     const p = catalog.find(x=>x.id===id);
     if(!p || p.experience) return;
-    const idx = TICKET_STATES.indexOf(ticketOf(p));
-    p.ticket = TICKET_STATES[(idx+1) % TICKET_STATES.length];
+    p.ticket = value;
     delete p.onsite;
     saveCatalog(); renderAll();
   }
@@ -762,16 +767,16 @@ if(!window.storage){
     });
     Object.keys(VENUE_POS).forEach(code=>{
       const [x,y]=VENUE_POS[code];
-      nodes += `<circle cx="${x}" cy="${y}" r="16" fill="#1b2422" stroke="#4FD9A8" stroke-width="1.5"/><text x="${x}" y="${y+4}" font-size="12" fill="#c7cdc3" text-anchor="middle" font-family="Archivo Narrow">${code}</text>`;
+      nodes += `<circle cx="${x}" cy="${y}" r="16" fill="#1b2422" stroke="#6b756f" stroke-width="1.5"/><text x="${x}" y="${y+4}" font-size="12" fill="#c7cdc3" text-anchor="middle" font-family="Archivo Narrow">${code}</text>`;
     });
     let path = '';
     known.forEach((p,i)=>{
       const [x,y]=VENUE_POS[p.venue];
-      if(i>0){ const [px,py]=VENUE_POS[known[i-1].venue]; path += `<line x1="${px}" y1="${py}" x2="${x}" y2="${y}" stroke="#3FC6E8" stroke-width="2" stroke-dasharray="6,5"/>`; }
+      if(i>0){ const [px,py]=VENUE_POS[known[i-1].venue]; path += `<line x1="${px}" y1="${py}" x2="${x}" y2="${y}" stroke="#c7cdc3" stroke-width="2" stroke-dasharray="6,5"/>`; }
     });
     known.forEach((p,i)=>{
       const [x,y]=VENUE_POS[p.venue];
-      lines += `<circle cx="${x}" cy="${y}" r="12" fill="#3FC6E8"/><text x="${x}" y="${y+4}" font-size="12" fill="#0a1112" text-anchor="middle" font-weight="700" font-family="Archivo Narrow">${i+1}</text>`;
+      lines += `<circle cx="${x}" cy="${y}" r="12" fill="#eef0e9"/><text x="${x}" y="${y+4}" font-size="12" fill="#0a1112" text-anchor="middle" font-weight="700" font-family="Archivo Narrow">${i+1}</text>`;
     });
     const svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%; height:auto; display:block;">
       <rect x="0" y="0" width="${W}" height="${H}" fill="#0a1112"/>
