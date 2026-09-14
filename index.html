@@ -606,7 +606,7 @@ if(!window.storage){
           <div class="meta">
             <div class="title" data-id="${p.id}" data-act="detail">${esc(p.title)}</div>
             ${p.venue ? '<span class="venue">'+esc(p.venue)+'</span>' : ''}
-            <button class="onsitetag ${ti.cls}" data-id="${p.id}" data-act="onsite" title="${p.experience ? '눌러서 예매 상태 변경 (미정 → 현장예매 불필요 → 매진) · 체험형 프로그램은 현장예매석이 없어요' : '눌러서 예매 상태 변경 (미정 → 현장예매 필요 → 현장예매 불필요 → 매진)'}">${ti.text}</button>
+            ${p.experience ? '' : `<button class="onsitetag ${ti.cls}" data-id="${p.id}" data-act="onsite" title="눌러서 예매 상태 변경 (미정 → 현장예매 필요 → 현장예매 불필요 → 매진)">${ti.text}</button>`}
           </div>
           <div class="actions">
             <button class="btn small ${picked?'secondary':''}" data-id="${p.id}" data-act="toggle">${picked?'담김 ✓':'담기'}</button>
@@ -626,7 +626,6 @@ if(!window.storage){
   }
 
   const TICKET_STATES = [null, 'onsite', 'free', 'soldout'];
-  function ticketStatesFor(p){ return p.experience ? TICKET_STATES.filter(t=>t!=='onsite') : TICKET_STATES; }
   function ticketOf(p){ return p.ticket !== undefined ? p.ticket : (p.onsite ? 'onsite' : null); }
   function isOnsite(p){ return ticketOf(p) === 'onsite'; }
   function ticketInfo(p){
@@ -639,10 +638,9 @@ if(!window.storage){
   }
   function cycleTicket(id){
     const p = catalog.find(x=>x.id===id);
-    if(!p) return;
-    const states = ticketStatesFor(p);
-    const idx = states.indexOf(ticketOf(p));
-    p.ticket = states[(idx+1) % states.length];
+    if(!p || p.experience) return;
+    const idx = TICKET_STATES.indexOf(ticketOf(p));
+    p.ticket = TICKET_STATES[(idx+1) % TICKET_STATES.length];
     delete p.onsite;
     saveCatalog(); renderAll();
   }
