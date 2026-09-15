@@ -124,6 +124,9 @@
   .venue-tooltip::before{display:none;}
   .stop-pin div{display:flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--stone-100); color:var(--ridge-950); font-family:'Archivo Narrow'; font-weight:700; font-size:12px;}
   .leaflet-control-attribution{background:rgba(10,17,18,0.7); color:var(--stone-300);}
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip{background:var(--ridge-900); color:var(--stone-100); box-shadow:0 2px 8px rgba(0,0,0,0.4);}
+  .leaflet-popup-content{font-family:'Plus Jakarta Sans'; font-size:12.5px; line-height:1.5; margin:9px 12px;}
+  .leaflet-popup-close-button{color:var(--stone-300) !important;}
   .leaflet-control-attribution a{color:var(--trail-300);}
   #shareCardHolder{position:absolute; left:-9999px; top:0;}
   .sharecard{width:680px; padding:40px 36px 32px; background:
@@ -784,14 +787,17 @@ if(!window.storage){
     const known = items.filter(p=>VENUE_LATLNG[p.venue]);
     Object.keys(VENUE_LATLNG).forEach(code=>{
       L.circleMarker(VENUE_LATLNG[code], {radius:7, color:'#6b756f', weight:1.5, fillColor:'#1b2422', fillOpacity:0.9})
-        .bindTooltip(code, {permanent:true, direction:'top', offset:[0,-6], className:'venue-tooltip'})
+        .bindTooltip(venueShortName(code), {permanent:true, direction:'top', offset:[0,-6], className:'venue-tooltip'})
+        .bindPopup(esc(venues[code] || code))
         .addTo(leafletLayer);
     });
     if(known.length>1){
       L.polyline(known.map(p=>VENUE_LATLNG[p.venue]), {color:'#c7cdc3', weight:2, dashArray:'6,5'}).addTo(leafletLayer);
     }
     known.forEach((p,i)=>{
-      L.marker(VENUE_LATLNG[p.venue], {icon: L.divIcon({className:'stop-pin', html:`<div>${i+1}</div>`, iconSize:[22,22]})}).addTo(leafletLayer);
+      L.marker(VENUE_LATLNG[p.venue], {icon: L.divIcon({className:'stop-pin', html:`<div>${i+1}</div>`, iconSize:[22,22]})})
+        .bindPopup(`${i+1}. ${esc(p.title)}<br>${esc(venueShortName(p.venue))} · ${p.start}`)
+        .addTo(leafletLayer);
     });
   }
 
