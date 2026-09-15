@@ -266,6 +266,95 @@ if(!window.storage){
 }
 (function(){
   const DATES = ["2026-09-18","2026-09-19","2026-09-20","2026-09-21","2026-09-22"];
+  // ponytail: one-time snapshot of official stillcut URLs, matched by exact program title
+  // (2026-09-15). New programs or renamed titles won't have an entry here — use the
+  // 포스터 URL field on the add form for those.
+  const POSTER_BY_TITLE = {
+    "개막식: 오프닝 공연+개막작 <K2: 그림자를 따라서>+개막 공연": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_561807fab13e47.jpg",
+    "파타고니아: 30년의 기록": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_a5b7f5b70b474c.jpg",
+    "사라진 나무": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_9e832c46c1bd48.jpg",
+    "프로스트 이야기": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_4b277853f71048.jpg",
+    "블록 5": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_89d3f439ba2c46.jpg",
+    "화이트 스노우": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_63a53a38056b44.jpg",
+    "K2의 실종": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_d30928a5830640.jpg",
+    "산속의 대화": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_06ea072bbd284e.jpg",
+    "남극에서 온 편지": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_9e72022a35c449.jpg",
+    "공순이": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_5a4d1f86079d4d.jpg",
+    "알레시 쿠나베르의 초상": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_5e1e5e4406574c.jpg",
+    "밤빛 러닝": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_68ca85be76d840.jpg",
+    "밤빛 요가": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_6cd0c2c0e74249.jpg",
+    "쿠키를 통해 슬로베니아를 만나다": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_22839adc624841.jpg",
+    "아슬아슬 슬랙라인": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_fa5284a626e24c.jpg",
+    "영남알프스 따라 숲여행": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_90e307e7689a40.jpg",
+    "버블드래곤": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_7f4e731ca0f24e.jpg",
+    "후피밴드": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_0a5d13d243d344.jpg",
+    "길기판": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_666b23dcf6f545.jpg",
+    "UMCA 2026 전시": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_ae4fc9fa67eb46.jpg",
+    "산을 보며, 나를 마주하다": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_9913fd3510b640.png",
+    "하이브리드 레이스": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_9d074fa5651f49.jpg",
+    "<내일의 민재> + 까치산 & 신인류": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_b7df6c46cfe54c.jpg",
+    "코야반 이야기": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_5cba632a963644.jpg",
+    "눈 위의 질주": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_93e864205e4043.jpg",
+    "첫 문장의 용기: 산악전기작가가 말하는 AI시대 글쓰기의 시작과 완성": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_7ad327a49d6e41.jpg",
+    "키케츠": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_721f2f60626d4d.jpg",
+    "산은 변하지 않는다": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_f278755e40a741.jpg",
+    "잃어버린 뿌리": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_9afefcdb582643.jpg",
+    "미로": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_8b4e02652a7b43.jpg",
+    "회생": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_c55c0a15775c4f.jpg",
+    "가족 치료": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_f59a40228bf74b.jpg",
+    "스페이스 카우보이": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_ab558cb3290846.jpg",
+    "숨겨진 계곡": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_e379125f380d4b.jpg",
+    "셰르파": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_37300deba20d42.jpg",
+    "협곡 탐험": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_220492aa8d1641.jpg",
+    "심연 속으로": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_05aa6476b7194b.jpg",
+    "싱잉볼 치유명상": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_bbc03216007c42.jpg",
+    "판타스틱 판타!": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_9c3d77c8cd9e4e.jpg",
+    "세계를 잇는 꿀벌, 자연을 잇는 밀랍": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_faecd264c0d84e.jpg",
+    "극단 '이상한 움직임'": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_26f4a4c17c364c.jpg",
+    "율리안 알프스 - 슬로베니아의 밤": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_39e676c88fa04e.jpg",
+    "학생 산악연맹 라운드 테이블": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_b295a082ce0a48.png",
+    "산악문화 포럼: 글과 경험의 변주": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_fc8e3ad0d4e744.jpg",
+    "2026 대한산악연맹 히말라야 사트피크(SAT PEAK) 원정대": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_ba4a30b37e6546.jpeg",
+    "영화의 감정을 향기와 꽃으로 기록하다": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_b158e96324ec41.jpg",
+    "움프 보물창고": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_e9d6bfbdd0a949.png",
+    "데이브 유": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_f8083e85d4c34b.jpg",
+    "움프 무대인사": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_b9a7007708974b.jpg",
+    "모린": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_ea83584fdaa64f.jpg",
+    "<마리안의 마지막 도전> + 송소희": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_2cd3896d200b44.jpg",
+    "산 사람": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_8b340d6ee8d942.jpg",
+    "우리들의 도반, 신나리": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_5e1c8358cade49.jpg",
+    "산의 전사들": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_3af5558d81994f.jpg",
+    "마지막 라마": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_3087a57d062f4a.jpg",
+    "너를 향한 3000km": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_aa76a6d0f5fe43.jpg",
+    "내일의 민재": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_f6213f5e8ea542.jpg",
+    "텐": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_e7f2c52ec8614f.jpg",
+    "노크": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_38c2218351ac46.jpg",
+    "더블엠": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_7921446e068f4f.jpg",
+    "손님 접대법": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_0e5a3e2a0d3242.jpg",
+    "빌리": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_048d55355c494d.jpg",
+    "2026 카라코람과 히말라야, 학생 원정대의 6천 미터 기록": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_f0b7552c129043.jpeg",
+    "더사운드스테이지앙상블 (김주원)": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_c3cae610e9e44c.jpg",
+    "무드리스트": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_33599ea2540c48.jpg",
+    "\"떠오르는 히말라야의 영웅들\" 북토크": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_70a1b54ed99549.jpg",
+    "<전설의 라이트닝 할배> + 카더가든": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_9c69abd570e340.jpg",
+    "아코디언 도어": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_00b41b5667e645.jpg",
+    "은광": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_72b5970213434a.jpg",
+    "K2: 그림자를 따라서": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_561807fab13e47.jpg",
+    "제이슨의 나무 상자": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_89910b374ec04e.jpg",
+    "황금 골짜기의 챔피언들": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_e38b5f6ee2da41.jpg",
+    "안녕, 키케츠": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_e2ba9340b0c849.jpg",
+    "마법의 정원 이야기": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_162134f42fec41.jpg",
+    "엉클키드": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_19a1e65d53424d.jpg",
+    "최예슬": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_c51518334ed44c.jpg",
+    "이재홍": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_8e810669bce34b.jpg",
+    "폐막식: <여전히 항해 중> + 폐막 공연": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_76f6e176adc246.jpg",
+    "마리안의 마지막 도전": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_5db53e94b86c40.jpg",
+    "숲의 속삭임": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_a401f5b442074a.jpg",
+    "산불 진화대 2045": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_d40ac85608ba43.jpg",
+    "도반": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_c296f8af652743.jpg",
+    "스튜디오 감탄호": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_5cf74a935ebe4a.jpg",
+    "홍진표 트리오": "https://www.umff.kr/db/9909_db/FILM_PHOTO/mm_9db51e213d6045.jpg"
+  };
   const DEFAULT_VENUES = {
     "UC":  "움프 시네마 · 개폐막식 전용, 비지정좌석",
     "AC1": "알프스 시네마1 · 실내 지정좌석, 외부음식 반입 불가",
@@ -613,9 +702,10 @@ if(!window.storage){
       const picked = isPicked(currentDate, p.id);
       const ti = ticketInfo(p);
       const card = document.createElement('div'); card.className = 'card';
+      const poster = p.poster || POSTER_BY_TITLE[p.title];
       card.innerHTML = `
         <div class="cardtop">
-          ${p.poster ? `<img class="poster" src="${esc(p.poster)}" alt="" onerror="this.remove()">` : ''}
+          ${poster ? `<img class="poster" src="${esc(poster)}" alt="" onerror="this.remove()">` : ''}
           <div class="time">${p.start}${p.end ? '<small>~ '+p.end+'</small>' : ''}</div>
           <div class="meta">
             <div class="title" data-id="${p.id}" data-act="detail">${esc(p.title)}</div>
