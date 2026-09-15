@@ -124,9 +124,6 @@
   .venue-tooltip::before{display:none;}
   .stop-pin div{display:flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--stone-100); color:var(--ridge-950); font-family:'Archivo Narrow'; font-weight:700; font-size:12px;}
   .leaflet-control-attribution{background:rgba(10,17,18,0.7); color:var(--stone-300);}
-  .leaflet-popup-content-wrapper, .leaflet-popup-tip{background:var(--ridge-900); color:var(--stone-100); box-shadow:0 2px 8px rgba(0,0,0,0.4);}
-  .leaflet-popup-content{font-family:'Plus Jakarta Sans'; font-size:12.5px; line-height:1.5; margin:9px 12px;}
-  .leaflet-popup-close-button{color:var(--stone-300) !important;}
   .leaflet-control-attribution a{color:var(--trail-300);}
   #shareCardHolder{position:absolute; left:-9999px; top:0;}
   .sharecard{width:680px; padding:40px 36px 32px; background:
@@ -146,6 +143,8 @@
   .shareimgwrap{margin-top:12px;}
   .shareimgwrap img{max-width:100%; border-radius:4px; border:1px solid var(--line);}
   .mapnote{font-size:11.5px; color:var(--stone-300); margin-top:6px;}
+  .mapdetail{margin-top:8px; border:1px solid var(--line); border-radius:3px; padding:9px 11px; font-size:13px; color:var(--stone-300); line-height:1.5;}
+  .mapdetail b{color:var(--stone-100); font-family:'Archivo Narrow';}
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:var(--ridge-800); border-radius:4px;}
 </style>
@@ -211,6 +210,7 @@
 
       <div class="mapwrap">
         <div id="mapContainer"></div>
+        <div id="mapDetail" class="mapdetail">지도에서 위치나 번호를 눌러보세요.</div>
         <p class="mapnote">* OpenStreetMap 기반 실제 지도예요. 각 상영관 핀 위치는 공식 행사장 안내 지도를 참고한 근사치라 실제와 몇십 미터 오차가 있을 수 있어요.</p>
       </div>
 
@@ -784,11 +784,12 @@ if(!window.storage){
   function renderMap(items){
     initLeafletMap();
     leafletLayer.clearLayers();
+    $('mapDetail').textContent = '지도에서 위치나 번호를 눌러보세요.';
     const known = items.filter(p=>VENUE_LATLNG[p.venue]);
     Object.keys(VENUE_LATLNG).forEach(code=>{
       L.circleMarker(VENUE_LATLNG[code], {radius:7, color:'#6b756f', weight:1.5, fillColor:'#1b2422', fillOpacity:0.9})
         .bindTooltip(venueShortName(code), {permanent:true, direction:'top', offset:[0,-6], className:'venue-tooltip'})
-        .bindPopup(esc(venues[code] || code))
+        .on('click', () => { $('mapDetail').innerHTML = `<b>${esc(venueShortName(code))}</b><br>${esc(venues[code] || code)}`; })
         .addTo(leafletLayer);
     });
     if(known.length>1){
@@ -796,7 +797,7 @@ if(!window.storage){
     }
     known.forEach((p,i)=>{
       L.marker(VENUE_LATLNG[p.venue], {icon: L.divIcon({className:'stop-pin', html:`<div>${i+1}</div>`, iconSize:[22,22]})})
-        .bindPopup(`${i+1}. ${esc(p.title)}<br>${esc(venueShortName(p.venue))} · ${p.start}`)
+        .on('click', () => { $('mapDetail').innerHTML = `<b>${i+1}. ${esc(p.title)}</b><br>${esc(venueShortName(p.venue))} · ${p.start}${p.end?'~'+p.end:''}`; })
         .addTo(leafletLayer);
     });
   }
