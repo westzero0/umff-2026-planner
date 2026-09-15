@@ -288,8 +288,18 @@ if(!window.storage){
     {title:"[공지] '자연에서 노래하다(영화+공연)' 관람 안내", url:"https://www.umff.kr/kor/artyboard/Mboard.asp?Action=view&strBoardID=EF9H_D13B&intSeq=16698"},
     {title:"[발표] 제11회 울산울주세계산악영화제 움프 보물창고 참여자 선정 결과 발표", url:"https://www.umff.kr/kor/artyboard/Mboard.asp?Action=view&strBoardID=EF9H_D13B&intSeq=16684"}
   ];
-  function renderNotices(){
-    $('noticeBox').innerHTML = `<b>UMFF 공지사항</b><ul>${NOTICES.map(n=>`<li><a href="${esc(n.url)}" target="_blank" rel="noopener noreferrer">${esc(n.title)}</a></li>`).join('')}</ul>`;
+  function paintNotices(list){
+    $('noticeBox').innerHTML = `<b>UMFF 공지사항</b><ul>${list.map(n=>`<li><a href="${esc(n.url)}" target="_blank" rel="noopener noreferrer">${esc(n.title)}</a></li>`).join('')}</ul>`;
+  }
+  async function renderNotices(){
+    paintNotices(NOTICES);
+    // notices.json is refreshed daily by .github/workflows/notices.yml (same-origin
+    // fetch, so unlike umff.kr itself this isn't blocked by CORS) — fall back to the
+    // static NOTICES snapshot above if it's missing or the fetch fails.
+    try{
+      const res = await fetch('notices.json', {cache:'no-store'});
+      if(res.ok){ const fresh = await res.json(); if(Array.isArray(fresh) && fresh.length) paintNotices(fresh); }
+    }catch(e){ /* keep the static snapshot */ }
   }
   // ponytail: one-time snapshot of official stillcut URLs, matched by exact program title
   // (2026-09-15). New programs or renamed titles won't have an entry here — use the
