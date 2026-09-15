@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
   :root{
     --ridge-950:#0a1112; --ridge-900:#12181a; --ridge-800:#1b2422;
@@ -117,6 +119,12 @@
   .sharebox{margin-top:18px; border-top:1px solid var(--line); padding-top:14px;}
   .sharebox .code{font-family:'Archivo Narrow'; font-size:22px; letter-spacing:3px; color:var(--trail-300); background:var(--ridge-950); border:1px solid var(--line); padding:8px 12px; border-radius:3px; display:inline-block;}
   .mapwrap{margin-top:14px; border:1px solid var(--line); border-radius:4px; padding:8px; background:var(--ridge-950);}
+  #mapContainer{height:360px; border-radius:3px;}
+  .venue-tooltip{background:var(--ridge-900); border:1px solid var(--line); color:var(--stone-100); font-family:'Archivo Narrow'; font-size:11px; padding:1px 5px; box-shadow:none;}
+  .venue-tooltip::before{display:none;}
+  .stop-pin div{display:flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--stone-100); color:var(--ridge-950); font-family:'Archivo Narrow'; font-weight:700; font-size:12px;}
+  .leaflet-control-attribution{background:rgba(10,17,18,0.7); color:var(--stone-300);}
+  .leaflet-control-attribution a{color:var(--trail-300);}
   #shareCardHolder{position:absolute; left:-9999px; top:0;}
   .sharecard{width:680px; padding:40px 36px 32px; background:
       radial-gradient(700px 380px at 90% -10%, rgba(63,198,232,0.16), transparent 60%),
@@ -199,8 +207,8 @@
       </div>
 
       <div class="mapwrap">
-        <div id="mapSvgHolder"></div>
-        <p class="mapnote">* 공식 행사장 지도의 배치를 참고해 새로 그린 약식 안내도예요(원본 이미지는 그대로 사용하지 않았어요). 회색 점은 참고용 시설이며 동선 경로에는 포함되지 않아요.</p>
+        <div id="mapContainer"></div>
+        <p class="mapnote">* OpenStreetMap 기반 실제 지도예요. 각 상영관 핀 위치는 공식 행사장 안내 지도를 참고한 근사치라 실제와 몇십 미터 오차가 있을 수 있어요.</p>
       </div>
 
       <div class="venuebox">
@@ -271,19 +279,17 @@ if(!window.storage){
     "DG":  "등억꽃향 · 전시 공간(UMCA 2026 전시 등)",
     "SR":  "세미나실 · 포럼·라운드테이블 진행 공간"
   };
-  // ponytail: 좌표는 공식 행사장 안내 지도(umff.kr/가이드/행사장 안내, ⓒ131WATT)에 표시된
-  // 위치를 참고해 잡았어요 — 이미지 자체는 쓰지 않고 배치 정보만 옮겨서 새로 그렸어요.
-  const VENUE_POS = {
-    "TC1":[95,310], "TC2":[104,332], "TC3":[113,354], "MS":[175,472],
-    "HC":[398,148], "AC1":[623,417], "UC":[753,491], "CC":[609,206],
-    "HS":[741,284], "AC2":[965,284], "DC":[942,373], "FC":[906,144],
-    "CBC":[731,20], "SQ":[475,550], "DG":[75,600], "SR":[110,565]
+  // ponytail: 실제 위경도예요. 알프스카페(카페 뒤 극장·CC 바로 옆) 한 지점만 공식 정보에서
+  // 좌표를 확인했고(access.visitkorea.or.kr), 나머지는 공식 행사장 안내 지도(umff.kr, ⓒ131WATT)
+  // 상의 상대 배치를 그 지점 기준으로 환산한 근사값이라 실제와 몇십 미터 오차가 있을 수 있어요.
+  const VENUE_LATLNG = {
+    "TC1":[35.556064,129.065773], "TC2":[35.555995,129.065806], "TC3":[35.555926,129.065841],
+    "MS": [35.555555,129.066081], "HC": [35.556574,129.066943], "AC1":[35.555728,129.067812],
+    "UC": [35.555495,129.068315], "CC": [35.556391,129.067758], "HS": [35.556146,129.068268],
+    "AC2":[35.556146,129.069134], "DC": [35.555866,129.069045], "FC": [35.556586,129.068906],
+    "CBC":[35.556976,129.068230], "SQ": [35.555310,129.067240], "DG": [35.555153,129.065695],
+    "SR": [35.555262,129.065829]
   };
-  const LANDMARKS = [
-    ["입구",52,553], ["기념품샵",249,472], ["식음료부스",416,472], ["움프 놀이터",282,390],
-    ["포스터존",416,597], ["산악문화관",531,406], ["옥상쉼터",763,304], ["영상체험관",802,386],
-    ["게스트데스크",948,405], ["국제클라이밍장",909,181], ["숲속쉼터",918,48]
-  ];
 
   let catalog = [];          // shared: {id,date,start,end,venue,title,detail}
   let myPicks = {};          // personal: {date: [id,...]}
@@ -760,31 +766,33 @@ if(!window.storage){
     updateShareUI(conflictCount===0 && confirmed[currentDate]===true);
   }
 
+  let leafletMap = null, leafletLayer = null;
+  function initLeafletMap(){
+    if(leafletMap) return;
+    leafletMap = L.map('mapContainer', {scrollWheelZoom:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(leafletMap);
+    leafletMap.fitBounds(Object.values(VENUE_LATLNG), {padding:[24,24]});
+    leafletLayer = L.layerGroup().addTo(leafletMap);
+  }
+
   function renderMap(items){
-    const W=1000,H=700;
-    const known = items.filter(p=>VENUE_POS[p.venue]);
-    let nodes = '', lines = '', landmarks = '';
-    LANDMARKS.forEach(([label,x,y])=>{
-      landmarks += `<circle cx="${x}" cy="${y}" r="5" fill="#3a4a45"/><text x="${x}" y="${y-9}" font-size="9" fill="#8a948f" text-anchor="middle" font-family="Plus Jakarta Sans">${label}</text>`;
+    initLeafletMap();
+    leafletLayer.clearLayers();
+    const known = items.filter(p=>VENUE_LATLNG[p.venue]);
+    Object.keys(VENUE_LATLNG).forEach(code=>{
+      L.circleMarker(VENUE_LATLNG[code], {radius:7, color:'#6b756f', weight:1.5, fillColor:'#1b2422', fillOpacity:0.9})
+        .bindTooltip(code, {permanent:true, direction:'top', offset:[0,-6], className:'venue-tooltip'})
+        .addTo(leafletLayer);
     });
-    Object.keys(VENUE_POS).forEach(code=>{
-      const [x,y]=VENUE_POS[code];
-      nodes += `<circle cx="${x}" cy="${y}" r="16" fill="#1b2422" stroke="#6b756f" stroke-width="1.5"/><text x="${x}" y="${y+4}" font-size="12" fill="#c7cdc3" text-anchor="middle" font-family="Archivo Narrow">${code}</text>`;
-    });
-    let path = '';
+    if(known.length>1){
+      L.polyline(known.map(p=>VENUE_LATLNG[p.venue]), {color:'#c7cdc3', weight:2, dashArray:'6,5'}).addTo(leafletLayer);
+    }
     known.forEach((p,i)=>{
-      const [x,y]=VENUE_POS[p.venue];
-      if(i>0){ const [px,py]=VENUE_POS[known[i-1].venue]; path += `<line x1="${px}" y1="${py}" x2="${x}" y2="${y}" stroke="#c7cdc3" stroke-width="2" stroke-dasharray="6,5"/>`; }
+      L.marker(VENUE_LATLNG[p.venue], {icon: L.divIcon({className:'stop-pin', html:`<div>${i+1}</div>`, iconSize:[22,22]})}).addTo(leafletLayer);
     });
-    known.forEach((p,i)=>{
-      const [x,y]=VENUE_POS[p.venue];
-      lines += `<circle cx="${x}" cy="${y}" r="12" fill="#eef0e9"/><text x="${x}" y="${y+4}" font-size="12" fill="#0a1112" text-anchor="middle" font-weight="700" font-family="Archivo Narrow">${i+1}</text>`;
-    });
-    const svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%; height:auto; display:block;">
-      <rect x="0" y="0" width="${W}" height="${H}" fill="#0a1112"/>
-      ${landmarks}${nodes}${path}${lines}
-    </svg>`;
-    $('mapSvgHolder').innerHTML = svg;
   }
 
   function updateShareUI(canShare){
@@ -959,7 +967,11 @@ if(!window.storage){
   };
 
   $('mtab-list').onclick = () => { $('mtab-list').classList.add('active'); $('mtab-plan').classList.remove('active'); $('panel-list').style.display='block'; $('panel-plan').style.display='none'; };
-  $('mtab-plan').onclick = () => { $('mtab-plan').classList.add('active'); $('mtab-list').classList.remove('active'); $('panel-plan').style.display='block'; $('panel-list').style.display='none'; };
+  $('mtab-plan').onclick = () => {
+    $('mtab-plan').classList.add('active'); $('mtab-list').classList.remove('active');
+    $('panel-plan').style.display='block'; $('panel-list').style.display='none';
+    if(leafletMap){ leafletMap.invalidateSize(); leafletMap.fitBounds(Object.values(VENUE_LATLNG), {padding:[24,24]}); }
+  };
   function applyMobileDefault(){ if(window.innerWidth<=860){ $('panel-plan').style.display='none'; } }
 
   (async function init(){
