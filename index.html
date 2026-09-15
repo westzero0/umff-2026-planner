@@ -68,6 +68,7 @@
   .proglist{display:flex; flex-direction:column; gap:8px;}
   .card{border:1px solid var(--line); border-radius:3px; padding:10px 12px; background:var(--ridge-800);}
   .cardtop{display:flex; gap:10px; align-items:flex-start;}
+  .card .poster{width:44px; height:62px; object-fit:cover; border-radius:2px; border:1px solid var(--line); flex:0 0 auto; background:var(--ridge-950);}
   .card .time{font-family:'Archivo Narrow'; font-weight:600; font-size:17px; color:var(--trail-300); min-width:78px;}
   .card .time small{display:block; font-family:'Plus Jakarta Sans'; font-size:11px; color:var(--stone-300); font-weight:400;}
   .card .meta{flex:1; min-width:0;}
@@ -189,6 +190,7 @@
             <input id="qa-venue" placeholder="장소코드 (예: UC)" style="background:var(--ridge-950);border:1px solid var(--line);color:var(--stone-100);border-radius:3px;padding:6px 8px;width:110px;">
           </div>
           <input id="qa-title" type="text" placeholder="프로그램명">
+          <input id="qa-poster" type="text" placeholder="포스터 이미지 URL (선택)" style="margin-top:6px;">
           <div style="margin-top:8px;"><button class="btn small" id="qa-submit">추가</button></div>
         </div>
       </div>
@@ -613,6 +615,7 @@ if(!window.storage){
       const card = document.createElement('div'); card.className = 'card';
       card.innerHTML = `
         <div class="cardtop">
+          ${p.poster ? `<img class="poster" src="${esc(p.poster)}" alt="" onerror="this.remove()">` : ''}
           <div class="time">${p.start}${p.end ? '<small>~ '+p.end+'</small>' : ''}</div>
           <div class="meta">
             <div class="title" data-id="${p.id}" data-act="detail">${esc(p.title)}</div>
@@ -853,11 +856,11 @@ if(!window.storage){
   $('btnQuickAdd').onclick = () => { $('quickAddForm').style.display = $('quickAddForm').style.display==='none'?'block':'none'; };
 
   $('qa-submit').onclick = async () => {
-    const start=$('qa-start').value, venue=$('qa-venue').value.trim().toUpperCase(), title=$('qa-title').value.trim();
+    const start=$('qa-start').value, venue=$('qa-venue').value.trim().toUpperCase(), title=$('qa-title').value.trim(), poster=$('qa-poster').value.trim();
     if(!start || !title){ alert('시작 시간과 프로그램명은 필수예요.'); return; }
-    catalog.push({id: uid++, date: currentDate, start, end: null, venue, title, detail:'', ticket: null, experience:false});
+    catalog.push({id: uid++, date: currentDate, start, end: null, venue, title, detail:'', poster, ticket: null, experience:false});
     if(venue && !(venue in venues)) venues[venue] = '';
-    $('qa-start').value=''; $('qa-venue').value=''; $('qa-title').value='';
+    $('qa-start').value=''; $('qa-venue').value=''; $('qa-title').value=''; $('qa-poster').value='';
     await saveCatalog(); await saveVenues(); renderAll();
   };
 
